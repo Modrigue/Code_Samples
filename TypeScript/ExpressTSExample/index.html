@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <!--meta name="viewport" content="width=device-width, initial-scale=1.0"-->
+        <meta content="" name=keywords>
+        <title>Test NodeJS</title>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <!--link rel="apple-touch-icon" href="img/icon.png">
+        <link rel="icon" href="img/icon.png">
+        <link rel="stylesheet" href="css/style.css">
+        <script src="js/script.js" type="text/javascript"></script-->
+
+        <style>
+            button
+            {
+                cursor: pointer;
+            }
+        </style>
+        
+    </head>
+    <body>
+
+        <h1>Welcome to my site</h1>
+
+        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quia cupiditate velit quasi. Atque debitis iste vero eius repellat, consectetur voluptatum beatae eligendi inventore hic recusandae dolor odio error magnam nemo!</p>
+
+        <form action='/' method="post">
+            <div>
+                <label for="word1">Word n°1</label>
+                <textarea name="word1" id="word1" onkeyup="update()"></textarea>
+            </div>
+            <button id= "button_submit" disabled>Send</button>
+        </form>
+
+        <script>
+            function update()
+            {
+                const buttonSubmit = document.getElementById("button_submit");
+                const textWord1 = document.getElementById("word1");
+                buttonSubmit.disabled = (textWord1.value.length == 0);
+            }
+        </script>
+
+    </body>
+</html>
