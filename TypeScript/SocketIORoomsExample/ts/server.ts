@@ -32,9 +32,17 @@ class Player_S
 
     room: string = "";
     color: string = "";
+
+    isCreator:  boolean = false;
 }
 
-let serverBalls: Map<string, Player_S> = new Map<string, Player_S>();
+class Game_S
+{
+    nbPlayers: number = 0;
+    players: Map<string, Player_S> = new Map<string, Player_S>();
+}
+
+let games = new Map<string, Game_S>();
 let clientNo: number = 0;
 
 io.on('connection', connected);
@@ -46,11 +54,41 @@ function connected(socket: any)
     const room = 1;
     //const nbPlayersReady = getNbPlayersReadyInRoom(room);
     
+    socket.on('createNewRoom', (params: any, response: any) =>
+    {
+        console.log(`Client '${socket.id}' - '${params.name}' asks to create room '${params.room}'`);
+        
+        // check if room has already been created
+        if (games.has(params.room))
+        {
+            response({
+                error: `Room '${params.room} already exists. Please enter another room name.'`
+              });
+            return;
+        }
+
+        // ok, create room
+
+        let creator = new Player_S();
+        creator.isCreator = true;
+
+        let newGame = new Game_S();
+        newGame.players.set(socket.id, creator);
+        games.set(params.room, newGame);
+
+        // send updated rooms list to all clients
+        sendRoomsList();
+    });
 
     // disconnection
     socket.on('disconnect', function()
     {
         console.log(`Client '${socket.id}' disconnected`);
     });
+}
 
+function sendRoomsList()
+{
+    const rooms: Array<string> = Array.from(games.keys());
+    io.emit('roomsList', rooms);
 }
