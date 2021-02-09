@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.io Rooms Example</title>
+</head>
+<body>
+    <div id="sectionWelcome">
+        <p>Welcome</p>
+        <span>Enter your name</span>
+        <input id="userName" required maxlength="12" autocomplete="off" />
+        <br>
+        <input type="radio" id="radioJoinRoom" name="radioJoinCreateRoom" value="join" checked disabled>
+        <label class="input-label" for="radioJoinRoom" disabled>Join room</label>
+        <select id="joinRoomName" disabled></select>
+        <br>
+        <input type="radio" id="radioCreateRoom" name="radioJoinCreateRoom" value="create" disabled>
+        <label class="input-label" for="radioCreateRoom" disabled>Create new room</label>
+        <input id="createRoomName" required maxlength="24" autocomplete="off" disabled />
+        <br><br>
+        <button id="buttonSubmit" type="submit" disabled>GO</button>
+
+    </div>
+
+    <div id="sectionRoomSetup">
+    </div>
+
+    <div id="game">
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.js"></script>
+    
+    <!-- Client-side game -->
+    <script src="js/interface.js"></script>
+    <script src="js/client.js"></script>
+</body>
+</html>
