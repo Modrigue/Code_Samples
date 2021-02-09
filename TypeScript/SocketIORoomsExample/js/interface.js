@@ -5,12 +5,16 @@ window.onload = function () {
     userName.focus();
     const radioJoin = document.getElementById('radioJoinRoom');
     const radioCreate = document.getElementById('radioCreateRoom');
-    radioJoin.addEventListener('change', updateGUI);
-    radioCreate.addEventListener('change', updateGUI);
+    radioJoin.addEventListener('change', selectJoinRoom);
+    radioCreate.addEventListener('change', selectCreateRoom);
     const joinRoomName = document.getElementById('joinRoomName');
     const createRoomName = document.getElementById('createRoomName');
     joinRoomName.addEventListener('input', updateGUI);
     createRoomName.addEventListener('input', updateGUI);
+    joinRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
+    createRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
+    const buttonSubmit = document.getElementById('buttonSubmit');
+    buttonSubmit.addEventListener('click', onButtonClick);
 };
 function updateGUI() {
     const userName = document.getElementById('userName');
@@ -24,16 +28,27 @@ function updateGUI() {
     document.getElementById('radioCreateRoom').disabled = nameEmpty;
     const createRoomName = document.getElementById('createRoomName');
     createRoomName.disabled = nameEmpty || (mode == "join");
-    let room = "";
-    switch (mode) {
-        case "join":
-            room = joinRoomName.value;
-            break;
-        case "create":
-            room = createRoomName.value;
+    let room = getSelectedRoomName();
+    document.getElementById('buttonSubmit').disabled = (nameEmpty || room.length == 0);
+}
+function selectJoinRoom() {
+    updateGUI();
+    const joinRoomName = document.getElementById('joinRoomName');
+    if (!joinRoomName.disabled)
+        joinRoomName.focus();
+}
+function selectCreateRoom() {
+    updateGUI();
+    const createRoomName = document.getElementById('createRoomName');
+    if (!createRoomName.disabled)
+        createRoomName.focus();
+}
+function onJoinCreateRoomKeyDown(e) {
+    switch (e.key) {
+        case 'Enter':
+            onButtonClick();
             break;
     }
-    document.getElementById('buttonSubmit').disabled = (nameEmpty || room.length == 0);
 }
 function getSelectedRoomMode() {
     // get selected mode
@@ -43,5 +58,20 @@ function getSelectedRoomMode() {
             return radioMode.value;
     // not found
     return "";
+}
+function getSelectedRoomName() {
+    let room = "";
+    const joinRoomName = document.getElementById('joinRoomName');
+    const createRoomName = document.getElementById('createRoomName');
+    const mode = getSelectedRoomMode();
+    switch (mode) {
+        case "join":
+            room = joinRoomName.value;
+            break;
+        case "create":
+            room = createRoomName.value;
+            break;
+    }
+    return room;
 }
 //# sourceMappingURL=interface.js.map
