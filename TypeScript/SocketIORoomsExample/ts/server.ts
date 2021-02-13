@@ -56,6 +56,10 @@ let clientNo: number = 0;
 
 io.on('connection', connected);
 
+
+//////////////////////////////// RECEIVE EVENTS ///////////////////////////////
+
+
 function connected(socket: any)
 {
     console.log(`Client '${socket.id}' connected`);
@@ -132,7 +136,26 @@ function connected(socket: any)
         game.players.set(socket.id, player);
 
         socket.join(room);
+        updateNbPlayersMax(room, game.nbPlayersMax);
         response({ room: room });
+    });
+
+    // max. nb. of players update
+    socket.on('setNbPlayersMax', (params: any, response: any) => {
+        const room = getPlayerRoomFromId(socket.id);
+        if (room.length == 0)
+            return;
+
+        // update on all room clients game setup page
+        if (games.has(room))
+        {
+            const game = <Game_S>games.get(room);
+            if (game.status != GameStatus.PLAYING)
+            {
+                game.nbPlayersMax = params.nbPlayersMax;
+                updateNbPlayersMax(room, params.nbPlayersMax);
+            }
+        }
     });
 
     // disconnection
@@ -174,10 +197,36 @@ function connected(socket: any)
     });
 }
 
+
+////////////////////////////////// SEND EVENTS ////////////////////////////////
+
+
 function sendRoomsList()
 {
     const rooms: Array<string> = Array.from(games.keys());
     io.emit('roomsList', rooms);
+}
+
+function updateNbPlayersMax(room: string, nbPlayersMax: number)
+{
+    io.to(room).emit('updateNbPlayersMax', {room: room, nbPlayersMax: nbPlayersMax});
+}
+
+function kickPlayersFromRoom(room: string)
+{
+    io.to(room).emit('kickFromRoom', {room: room});
+}
+
+
+////////////////////////////////////// HELPERS ////////////////////////////////
+
+
+// delete empty rooms
+function deleteEmptyRooms()
+{
+    for (const [room, game] of games)
+        if (game.players == null || game.players.size == 0)
+            games.delete(room);
 }
 
 function getPlayerFromId(id: string): Player_S
@@ -191,15 +240,15 @@ function getPlayerFromId(id: string): Player_S
     return new Player_S();
 }
 
-function kickPlayersFromRoom(room: string): void
+function getPlayerRoomFromId(id: string): string
 {
-    io.to(room).emit('kickFromRoom', {room: room});
-}
+    let player = getPlayerFromId(id);
+        
+    // if unregistered player, nop
+    if (player.name.length == 0 || player.room.length == 0)
+        return "";
+    if (!games.has(player.room))
+        return "";
 
-// delete empty rooms
-function deleteEmptyRooms()
-{
-    for (const [room, game] of games)
-        if (game.players == null || game.players.size == 0)
-            games.delete(room);
+    return player.room;
 }

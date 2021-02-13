@@ -26,8 +26,8 @@ window.onload = function()
 
     // game setup page
 
-    const nbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
-    nbPlayers.addEventListener('input', onNumberInput);
+    const selectNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
+    selectNbPlayers.addEventListener('input', onNumberInput);
 }
 
 function updateGUI()
@@ -121,11 +121,4 @@ function setEnabled(id: string, status: boolean): void
 {
     let elem: any = document.getElementById(id);
     elem.disabled = !status;
-}
-
-// limit nb. of characters to max length
-function onNumberInput(): void
-{
-    if (this.value.length > this.maxLength)
-        this.value = this.value.slice(0, this.maxLength);
 }

@@ -64,7 +64,6 @@ function onButtonClick()
                     // ok, go to game setup page
                     (<HTMLParagraphElement>document.getElementById('gameSetupTitle')).innerText
                         = `Game ${response.room} setup`;
-
                     setVisible("pageWelcome", false);
                     setVisible("pageGameSetup", true);
                 }
@@ -82,6 +81,7 @@ function onButtonClick()
                 else if (response.room)
                 {
                     // ok, go to game setup page in creator mode
+
                     (<HTMLParagraphElement>document.getElementById('gameSetupTitle')).innerText
                         = `Game ${response.room} setup`;
 
@@ -124,4 +124,28 @@ socket.on('kickFromRoom', (params: any) => {
     (<HTMLSelectElement>document.getElementById('joinRoomName')).selectedIndex = -1;
     setVisible("pageWelcome", true);
     setVisible("pageGameSetup", false);
+});
+
+function onNumberInput(): void
+{
+    // limit nb. of characters to max length
+    if (this.value.length > this.maxLength)
+        this.value = this.value.slice(0, this.maxLength);
+
+    // update max. nb. players in room
+    const selectNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
+    if (!selectNbPlayers.disabled)
+    {
+        const nbPlayersMax = <number>parseInt(selectNbPlayers.value);
+        socket.emit('setNbPlayersMax', {nbPlayersMax: nbPlayersMax}, (response: any) => {});
+    }
+}
+
+socket.on('updateNbPlayersMax', (params: any) => {
+
+    const selectNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
+    if (!selectNbPlayers.disabled)
+        return; // creator, nop
+
+    selectNbPlayers.value = params.nbPlayersMax.toString();
 });

@@ -19,8 +19,8 @@ window.onload = function () {
     const buttonSubmit = document.getElementById('buttonSubmit');
     buttonSubmit.addEventListener('click', onButtonClick);
     // game setup page
-    const nbPlayers = document.getElementById('gameNbPlayers');
-    nbPlayers.addEventListener('input', onNumberInput);
+    const selectNbPlayers = document.getElementById('gameNbPlayers');
+    selectNbPlayers.addEventListener('input', onNumberInput);
 };
 function updateGUI() {
     const userName = document.getElementById('userName');
@@ -87,10 +87,5 @@ function setVisible(id, status) {
 function setEnabled(id, status) {
     let elem = document.getElementById(id);
     elem.disabled = !status;
-}
-// limit nb. of characters to max length
-function onNumberInput() {
-    if (this.value.length > this.maxLength)
-        this.value = this.value.slice(0, this.maxLength);
 }
 //# sourceMappingURL=interface.js.map

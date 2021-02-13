@@ -92,4 +92,21 @@ socket.on('kickFromRoom', (params) => {
     setVisible("pageWelcome", true);
     setVisible("pageGameSetup", false);
 });
+function onNumberInput() {
+    // limit nb. of characters to max length
+    if (this.value.length > this.maxLength)
+        this.value = this.value.slice(0, this.maxLength);
+    // update max. nb. players in room
+    const selectNbPlayers = document.getElementById('gameNbPlayers');
+    if (!selectNbPlayers.disabled) {
+        const nbPlayersMax = parseInt(selectNbPlayers.value);
+        socket.emit('setNbPlayersMax', { nbPlayersMax: nbPlayersMax }, (response) => { });
+    }
+}
+socket.on('updateNbPlayersMax', (params) => {
+    const selectNbPlayers = document.getElementById('gameNbPlayers');
+    if (!selectNbPlayers.disabled)
+        return; // creator, nop
+    selectNbPlayers.value = params.nbPlayersMax.toString();
+});
 //# sourceMappingURL=client.js.map
