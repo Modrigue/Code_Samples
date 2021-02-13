@@ -22,12 +22,16 @@ window.onload = function()
     createRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
 
     const buttonSubmit = <HTMLButtonElement>document.getElementById('buttonSubmit');
-    buttonSubmit.addEventListener('click', onButtonClick);
+    buttonSubmit.addEventListener('click', onSubmit);
 
     // game setup page
 
     const selectNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
     selectNbPlayers.addEventListener('input', onNumberInput);
+
+    // game page
+    const buttonPlay = <HTMLButtonElement>document.getElementById('buttonPlay');
+    buttonPlay.addEventListener('click', onPlay);
 }
 
 function updateGUI()
@@ -73,7 +77,7 @@ function onJoinCreateRoomKeyDown(e: any)
     switch(e.key)
     {
         case 'Enter':
-            onButtonClick();
+            onSubmit();
             break;
     }
 }

@@ -17,10 +17,13 @@ window.onload = function () {
     joinRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
     createRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
     const buttonSubmit = document.getElementById('buttonSubmit');
-    buttonSubmit.addEventListener('click', onButtonClick);
+    buttonSubmit.addEventListener('click', onSubmit);
     // game setup page
     const selectNbPlayers = document.getElementById('gameNbPlayers');
     selectNbPlayers.addEventListener('input', onNumberInput);
+    // game page
+    const buttonPlay = document.getElementById('buttonPlay');
+    buttonPlay.addEventListener('click', onPlay);
 };
 function updateGUI() {
     const userName = document.getElementById('userName');
@@ -52,7 +55,7 @@ function selectCreateRoom() {
 function onJoinCreateRoomKeyDown(e) {
     switch (e.key) {
         case 'Enter':
-            onButtonClick();
+            onSubmit();
             break;
     }
 }

@@ -31,7 +31,10 @@ socket.on('connect', () => {
 });
 
 
-function onButtonClick()
+//////////////////////////////// WELCOME PAGE ////////////////////////////////
+
+
+function onSubmit()
 {
     const userName = (<HTMLInputElement>document.getElementById('userName')).value;
     if (userName === null || userName.length == 0)
@@ -62,10 +65,15 @@ function onButtonClick()
                 else if (response.room)
                 {
                     // ok, go to game setup page
+
                     (<HTMLParagraphElement>document.getElementById('gameSetupTitle')).innerText
                         = `Game ${response.room} setup`;
                     setVisible("pageWelcome", false);
                     setVisible("pageGameSetup", true);
+                    setVisible("pageGame", false);
+
+                    setEnabled("gameNbPlayers", false);
+                    setEnabled("buttonPlay", false);
                 }
             });
             break;
@@ -87,8 +95,10 @@ function onButtonClick()
 
                     setVisible("pageWelcome", false);
                     setVisible("pageGameSetup", true);
+                    setVisible("pageGame", false);
 
                     setEnabled("gameNbPlayers", true);
+                    setEnabled("buttonPlay", true);
                 }
             });
             break;
@@ -117,6 +127,10 @@ socket.on('roomsList', (params: any) =>
 
     roomSelect.selectedIndex = -1;
 });
+
+
+/////////////////////////////// GAME SETUP PAGE ///////////////////////////////
+
 
 socket.on('kickFromRoom', (params: any) => {  
     // return to welcome page
@@ -148,4 +162,19 @@ socket.on('updateNbPlayersMax', (params: any) => {
         return; // creator, nop
 
     selectNbPlayers.value = params.nbPlayersMax.toString();
+});
+
+function onPlay()
+{
+    socket.emit('play', null, (response: any) => {});
+}
+
+socket.on('startGame', (params: any) => {
+
+    (<HTMLParagraphElement>document.getElementById('gameTitle')).innerText
+        = `Game ${params.room}`;
+
+    setVisible("pageWelcome", false);
+    setVisible("pageGameSetup", false);
+    setVisible("pageGame", true);
 });

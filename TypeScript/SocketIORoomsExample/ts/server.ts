@@ -158,6 +158,24 @@ function connected(socket: any)
         }
     });
 
+    // start play
+    socket.on('play', (params: any, response: any) => {
+        const room = getPlayerRoomFromId(socket.id);
+        if (room.length == 0)
+            return;
+        
+        if (games.has(room))
+        {
+            const game = <Game_S>games.get(room);
+            if (game.status == GameStatus.SETUP)
+            {
+                console.log(`Client '${socket.id}' starts game '${room}'`);
+                game.status = GameStatus.PLAYING;
+                startGame(room);
+            }
+        }
+    });
+
     // disconnection
     socket.on('disconnect', function()
     {
@@ -215,6 +233,11 @@ function updateNbPlayersMax(room: string, nbPlayersMax: number)
 function kickPlayersFromRoom(room: string)
 {
     io.to(room).emit('kickFromRoom', {room: room});
+}
+
+function startGame(room: string)
+{
+    io.to(room).emit('startGame', {room: room});
 }
 
 

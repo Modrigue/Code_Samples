@@ -23,7 +23,8 @@ let nbPlayersReadyInRoom = 0;
 socket.on('connect', () => {
     selfID = socket.id;
 });
-function onButtonClick() {
+//////////////////////////////// WELCOME PAGE ////////////////////////////////
+function onSubmit() {
     const userName = document.getElementById('userName').value;
     if (userName === null || userName.length == 0) {
         alert('Please enter your name');
@@ -49,6 +50,9 @@ function onButtonClick() {
                         = `Game ${response.room} setup`;
                     setVisible("pageWelcome", false);
                     setVisible("pageGameSetup", true);
+                    setVisible("pageGame", false);
+                    setEnabled("gameNbPlayers", false);
+                    setEnabled("buttonPlay", false);
                 }
             });
             break;
@@ -64,7 +68,9 @@ function onButtonClick() {
                         = `Game ${response.room} setup`;
                     setVisible("pageWelcome", false);
                     setVisible("pageGameSetup", true);
+                    setVisible("pageGame", false);
                     setEnabled("gameNbPlayers", true);
+                    setEnabled("buttonPlay", true);
                 }
             });
             break;
@@ -85,6 +91,7 @@ socket.on('roomsList', (params) => {
     }
     roomSelect.selectedIndex = -1;
 });
+/////////////////////////////// GAME SETUP PAGE ///////////////////////////////
 socket.on('kickFromRoom', (params) => {
     // return to welcome page
     document.getElementById('gameSetupTitle').innerText = `Welcome`;
@@ -108,5 +115,15 @@ socket.on('updateNbPlayersMax', (params) => {
     if (!selectNbPlayers.disabled)
         return; // creator, nop
     selectNbPlayers.value = params.nbPlayersMax.toString();
+});
+function onPlay() {
+    socket.emit('play', null, (response) => { });
+}
+socket.on('startGame', (params) => {
+    document.getElementById('gameTitle').innerText
+        = `Game ${params.room}`;
+    setVisible("pageWelcome", false);
+    setVisible("pageGameSetup", false);
+    setVisible("pageGame", true);
 });
 //# sourceMappingURL=client.js.map

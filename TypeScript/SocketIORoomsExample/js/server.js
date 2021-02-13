@@ -118,6 +118,20 @@ function connected(socket) {
             }
         }
     });
+    // start play
+    socket.on('play', (params, response) => {
+        const room = getPlayerRoomFromId(socket.id);
+        if (room.length == 0)
+            return;
+        if (games.has(room)) {
+            const game = games.get(room);
+            if (game.status == GameStatus.SETUP) {
+                console.log(`Client '${socket.id}' starts game '${room}'`);
+                game.status = GameStatus.PLAYING;
+                startGame(room);
+            }
+        }
+    });
     // disconnection
     socket.on('disconnect', function () {
         var _a;
@@ -158,6 +172,9 @@ function updateNbPlayersMax(room, nbPlayersMax) {
 }
 function kickPlayersFromRoom(room) {
     io.to(room).emit('kickFromRoom', { room: room });
+}
+function startGame(room) {
+    io.to(room).emit('startGame', { room: room });
 }
 ////////////////////////////////////// HELPERS ////////////////////////////////
 // delete empty rooms
