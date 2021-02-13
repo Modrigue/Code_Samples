@@ -1,15 +1,20 @@
 window.onload = function()
 {
+    // start on welcome page
+    setVisible("pageGameSetup", false);
+
     const userName = <HTMLInputElement>document.getElementById('userName');
     userName.addEventListener('input', updateGUI)
     userName.focus();
+
+    // welcome page
 
     const radioJoin = <HTMLInputElement>document.getElementById('radioJoinRoom');
     const radioCreate = <HTMLInputElement>document.getElementById('radioCreateRoom');
     radioJoin.addEventListener('change', selectJoinRoom);
     radioCreate.addEventListener('change', selectCreateRoom);
 
-    const joinRoomName = <HTMLInputElement>document.getElementById('joinRoomName');
+    const joinRoomName = <HTMLSelectElement>document.getElementById('joinRoomName');
     const createRoomName = <HTMLInputElement>document.getElementById('createRoomName');
     joinRoomName.addEventListener('input', updateGUI);
     createRoomName.addEventListener('input', updateGUI);
@@ -18,6 +23,11 @@ window.onload = function()
 
     const buttonSubmit = <HTMLButtonElement>document.getElementById('buttonSubmit');
     buttonSubmit.addEventListener('click', onButtonClick);
+
+    // game setup page
+
+    const nbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
+    nbPlayers.addEventListener('input', onNumberInput);
 }
 
 function updateGUI()
@@ -28,7 +38,7 @@ function updateGUI()
 
     // join room items
     (<HTMLInputElement>document.getElementById('radioJoinRoom')).disabled = nameEmpty;
-    const joinRoomName = <HTMLInputElement>document.getElementById('joinRoomName');
+    const joinRoomName = <HTMLSelectElement>document.getElementById('joinRoomName');
     joinRoomName.disabled = nameEmpty || (mode == "create");
 
     // create room items
@@ -84,7 +94,7 @@ function getSelectedRoomName(): string
 {
     let room: string = "";
 
-    const joinRoomName = <HTMLInputElement>document.getElementById('joinRoomName');
+    const joinRoomName = <HTMLSelectElement>document.getElementById('joinRoomName');
     const createRoomName = <HTMLInputElement>document.getElementById('createRoomName');
     const mode: string = getSelectedRoomMode();
     switch(mode)
@@ -99,4 +109,23 @@ function getSelectedRoomName(): string
     }
 
     return room;
+}
+
+function setVisible(id: string, status: boolean): void
+{
+    let elem: HTMLElement = <HTMLElement>document.getElementById(id);
+    elem.style.display = status ? "block" : "none";
+}
+
+function setEnabled(id: string, status: boolean): void
+{
+    let elem: any = document.getElementById(id);
+    elem.disabled = !status;
+}
+
+// limit nb. of characters to max length
+function onNumberInput(): void
+{
+    if (this.value.length > this.maxLength)
+        this.value = this.value.slice(0, this.maxLength);
 }

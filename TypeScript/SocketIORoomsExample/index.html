@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Socket.io Rooms Example</title>
 </head>
+<style>
+    p
+    {
+        font-weight: bold;
+    }
+</style>
 <body>
     <div id="pageWelcome">
         <p>Welcome</p>
@@ -23,7 +29,10 @@
 
     </div>
 
-    <div id="pageRoomSetup">
+    <div id="pageGameSetup">
+        <p id="gameSetupTitle">Game setup</p>
+        <span>Nb. of players:</span>
+        <input id="gameNbPlayers" type="number" required min=1 max=99 value=2 maxlength="2" style="width: 32px;" disabled />
     </div>
 
     <div id="pageGame">

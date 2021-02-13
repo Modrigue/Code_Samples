@@ -1,8 +1,11 @@
 "use strict";
 window.onload = function () {
+    // start on welcome page
+    setVisible("pageGameSetup", false);
     const userName = document.getElementById('userName');
     userName.addEventListener('input', updateGUI);
     userName.focus();
+    // welcome page
     const radioJoin = document.getElementById('radioJoinRoom');
     const radioCreate = document.getElementById('radioCreateRoom');
     radioJoin.addEventListener('change', selectJoinRoom);
@@ -15,6 +18,9 @@ window.onload = function () {
     createRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
     const buttonSubmit = document.getElementById('buttonSubmit');
     buttonSubmit.addEventListener('click', onButtonClick);
+    // game setup page
+    const nbPlayers = document.getElementById('gameNbPlayers');
+    nbPlayers.addEventListener('input', onNumberInput);
 };
 function updateGUI() {
     const userName = document.getElementById('userName');
@@ -73,5 +79,18 @@ function getSelectedRoomName() {
             break;
     }
     return room;
+}
+function setVisible(id, status) {
+    let elem = document.getElementById(id);
+    elem.style.display = status ? "block" : "none";
+}
+function setEnabled(id, status) {
+    let elem = document.getElementById(id);
+    elem.disabled = !status;
+}
+// limit nb. of characters to max length
+function onNumberInput() {
+    if (this.value.length > this.maxLength)
+        this.value = this.value.slice(0, this.maxLength);
 }
 //# sourceMappingURL=interface.js.map

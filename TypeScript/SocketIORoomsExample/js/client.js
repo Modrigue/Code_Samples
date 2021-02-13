@@ -37,7 +37,20 @@ function onButtonClick() {
     const mode = getSelectedRoomMode();
     switch (mode) {
         case 'join':
-            // TODO
+            socket.emit('joinRoom', { name: userName, room: room }, (response) => {
+                if (response.error) {
+                    alert(response.error);
+                    document.getElementById('joinRoomName').selectedIndex = -1;
+                    return;
+                }
+                else if (response.room) {
+                    // ok, go to game setup page
+                    document.getElementById('gameSetupTitle').innerText
+                        = `Game ${response.room} setup`;
+                    setVisible("pageWelcome", false);
+                    setVisible("pageGameSetup", true);
+                }
+            });
             break;
         case 'create':
             socket.emit('createNewRoom', { name: userName, room: room }, (response) => {
@@ -45,8 +58,13 @@ function onButtonClick() {
                     alert(response.error);
                     return;
                 }
-                else {
-                    // ok, go to setup page
+                else if (response.room) {
+                    // ok, go to game setup page in creator mode
+                    document.getElementById('gameSetupTitle').innerText
+                        = `Game ${response.room} setup`;
+                    setVisible("pageWelcome", false);
+                    setVisible("pageGameSetup", true);
+                    setEnabled("gameNbPlayers", true);
                 }
             });
             break;
@@ -66,5 +84,12 @@ socket.on('roomsList', (params) => {
         roomSelect.appendChild(option);
     }
     roomSelect.selectedIndex = -1;
+});
+socket.on('kickFromRoom', (params) => {
+    // return to welcome page
+    document.getElementById('gameSetupTitle').innerText = `Welcome`;
+    document.getElementById('joinRoomName').selectedIndex = -1;
+    setVisible("pageWelcome", true);
+    setVisible("pageGameSetup", false);
 });
 //# sourceMappingURL=client.js.map
