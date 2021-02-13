@@ -73,7 +73,9 @@ function onSubmit()
                     setVisible("pageGame", false);
 
                     setEnabled("gameNbPlayers", false);
-                    setEnabled("buttonPlay", false);
+                    setEnabled("buttonPlay", response.enablePlay);
+                    (<HTMLButtonElement>document.getElementById('buttonPlay')).innerText
+                        = response.enablePlay ? "JOIN GAME" : "START GAME";
                 }
             });
             break;
@@ -169,7 +171,7 @@ function onPlay()
     socket.emit('play', null, (response: any) => {});
 }
 
-socket.on('startGame', (params: any) => {
+socket.on('playGame', (params: any) => {
 
     (<HTMLParagraphElement>document.getElementById('gameTitle')).innerText
         = `Game ${params.room}`;

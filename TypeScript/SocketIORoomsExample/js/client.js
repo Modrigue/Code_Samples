@@ -52,7 +52,9 @@ function onSubmit() {
                     setVisible("pageGameSetup", true);
                     setVisible("pageGame", false);
                     setEnabled("gameNbPlayers", false);
-                    setEnabled("buttonPlay", false);
+                    setEnabled("buttonPlay", response.enablePlay);
+                    document.getElementById('buttonPlay').innerText
+                        = response.enablePlay ? "JOIN GAME" : "START GAME";
                 }
             });
             break;
@@ -119,7 +121,7 @@ socket.on('updateNbPlayersMax', (params) => {
 function onPlay() {
     socket.emit('play', null, (response) => { });
 }
-socket.on('startGame', (params) => {
+socket.on('playGame', (params) => {
     document.getElementById('gameTitle').innerText
         = `Game ${params.room}`;
     setVisible("pageWelcome", false);

@@ -100,9 +100,11 @@ function connected(socket) {
         player.room = room;
         let game = games.get(room);
         game.players.set(socket.id, player);
+        // enable play button if game already on
+        const enablePlay = (game.status == GameStatus.PLAYING);
         socket.join(room);
         updateNbPlayersMax(room, game.nbPlayersMax);
-        response({ room: room });
+        response({ room: room, enablePlay: enablePlay });
     });
     // max. nb. of players update
     socket.on('setNbPlayersMax', (params, response) => {
@@ -125,10 +127,16 @@ function connected(socket) {
             return;
         if (games.has(room)) {
             const game = games.get(room);
-            if (game.status == GameStatus.SETUP) {
-                console.log(`Client '${socket.id}' starts game '${room}'`);
-                game.status = GameStatus.PLAYING;
-                startGame(room);
+            switch (game.status) {
+                case GameStatus.SETUP:
+                    // start new game
+                    console.log(`Client '${socket.id}' starts game '${room}'`);
+                    game.status = GameStatus.PLAYING;
+                    playGame(room);
+                case GameStatus.PLAYING:
+                    // join started game
+                    console.log(`Client '${socket.id}' joins started game '${room}'`);
+                    playGame(room);
             }
         }
     });
@@ -173,8 +181,8 @@ function updateNbPlayersMax(room, nbPlayersMax) {
 function kickPlayersFromRoom(room) {
     io.to(room).emit('kickFromRoom', { room: room });
 }
-function startGame(room) {
-    io.to(room).emit('startGame', { room: room });
+function playGame(room) {
+    io.to(room).emit('playGame', { room: room });
 }
 ////////////////////////////////////// HELPERS ////////////////////////////////
 // delete empty rooms
