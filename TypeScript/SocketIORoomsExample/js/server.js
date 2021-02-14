@@ -24,6 +24,7 @@ class Player_S {
         this.name = "";
         this.room = "";
         this.color = "#0000ff";
+        this.team = "";
         this.creator = false;
     }
 }
@@ -141,6 +142,7 @@ function connected(socket) {
             if (player.name.length == 0)
                 return;
             player.color = params.color;
+            player.team = params.team;
             updatePlayersParams(room);
         }
     });
@@ -254,7 +256,7 @@ function updatePlayersParams(room) {
     const game = games.get(room);
     let playersParams = new Array();
     for (const [id, player] of game.players)
-        playersParams.push({ id: id, color: player.color });
+        playersParams.push({ id: id, color: player.color, team: player.team });
     io.to(room).emit('updatePlayersParams', playersParams);
 }
 function kickPlayerFromRoom(room, id) {

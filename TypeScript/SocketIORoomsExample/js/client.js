@@ -81,8 +81,7 @@ function onSubmit() {
     }
 }
 socket.on('roomsList', (params) => {
-    let roomsData = Array.from(params);
-    roomsData = roomsData.sort((a, b) => a.room.localeCompare(b.room)); // sort alphabetically
+    let roomsData = params.sort((a, b) => a.room.localeCompare(b.room)); // sort alphabetically
     // update room selector
     const roomSelect = document.getElementById("joinRoomName");
     while (roomSelect.options.length > 0)
@@ -99,6 +98,8 @@ socket.on('roomsList', (params) => {
 /////////////////////////////// GAME SETUP PAGE ///////////////////////////////
 socket.on('kickFromRoom', (params) => {
     if (params.id.length == 0 /* all */ || params.id == selfID) {
+        if (params.id == selfID)
+            alert(`You've been kicked from room '${params.room}'`);
         // return to welcome page
         document.getElementById('gameSetupTitle').innerText = `Welcome`;
         document.getElementById('joinRoomName').selectedIndex = -1;
@@ -122,10 +123,9 @@ function onNumberInput() {
 }
 socket.on('updatePlayersList', (params) => {
     const divPlayersList = document.getElementById('playersList');
-    let playersData = Array.from(params);
     if (divPlayersList.children && divPlayersList.children.length > 0) {
         let indexPlayerCur = 0;
-        for (const playerData of playersData) {
+        for (const playerData of params) {
             // create player options
             const divPlayer = divPlayersList.children.item(indexPlayerCur);
             divPlayer.id = `params_setup_player_${playerData.id}`;
@@ -134,6 +134,7 @@ socket.on('updatePlayersList', (params) => {
             if (playerData.id == selfID) {
                 divPlayer.style.fontWeight = "bold";
                 divPlayer.children.item(1).disabled = false;
+                divPlayer.children.item(2).disabled = false;
             }
             indexPlayerCur++;
         }
@@ -171,6 +172,18 @@ socket.on('updateRoomParams', (params) => {
             inputPlayerColor.disabled = true;
             inputPlayerColor.addEventListener('change', setPlayerParams);
             divPlayer.appendChild(inputPlayerColor);
+            // team
+            const selectPlayerTeam = document.createElement('select');
+            for (let i = 1; i <= 2; i++) {
+                let option = document.createElement('option');
+                option.value = i.toString();
+                option.textContent = `Team ${i}`;
+                selectPlayerTeam.appendChild(option);
+            }
+            selectPlayerTeam.selectedIndex = -1;
+            selectPlayerTeam.disabled = true;
+            selectPlayerTeam.addEventListener('change', setPlayerParams);
+            divPlayer.appendChild(selectPlayerTeam);
             divPlayersList.appendChild(divPlayer);
         }
     else if (nbPlayersCur > nbPlayersMax) {
@@ -199,12 +212,13 @@ function setPlayerParams() {
     // get player color
     const divPlayer = document.getElementById(`params_setup_player_${selfID}`);
     const color = divPlayer.children.item(1).value;
-    socket.emit('setPlayerParams', { color: color }, (response) => { });
+    // get player team
+    const team = divPlayer.children.item(2).value;
+    socket.emit('setPlayerParams', { color: color, team: team }, (response) => { });
 }
 // update player params
 socket.on('updatePlayersParams', (params) => {
-    let playersParams = Array.from(params);
-    for (const playerParams of playersParams) {
+    for (const playerParams of params) {
         const id = playerParams.id;
         if (id == selfID)
             continue; // nop
@@ -213,7 +227,9 @@ socket.on('updatePlayersParams', (params) => {
             continue;
         // update other player parameters
         divPlayer.children.item(1).value = playerParams.color;
+        divPlayer.children.item(2).value = playerParams.team;
     }
+    updatePlayButton();
 });
 function updatePlayButton() {
     if (!creator) {
@@ -231,7 +247,21 @@ function updatePlayButton() {
         if (divPlayer.id && divPlayer.id.startsWith(playerIdPrefix))
             nbPlayers++;
     }
-    setEnabled("buttonPlay", (nbPlayers == nbPlayersMax));
+    const nbPlayersCorrect = (nbPlayers == nbPlayersMax);
+    // get current players teams
+    let hasTeam1 = false;
+    let hasTeam2 = false;
+    for (const divPlayer of divPlayersList.children) {
+        const team = divPlayer.children.item(2).value;
+        if (team == "1")
+            hasTeam1 = true;
+        else if (team == "2")
+            hasTeam2 = true;
+    }
+    let teamsCorrect = (hasTeam1 && hasTeam2);
+    if (nbPlayersMax == 1)
+        teamsCorrect = (hasTeam1 || hasTeam2);
+    setEnabled("buttonPlay", nbPlayersCorrect && teamsCorrect);
 }
 function onPlay() {
     socket.emit('play', null, (response) => { });

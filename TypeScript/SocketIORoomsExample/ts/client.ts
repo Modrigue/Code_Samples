@@ -112,8 +112,7 @@ function onSubmit()
 
 socket.on('roomsList', (params: Array<{room: string, nbPlayersMax: number, nbPlayers: number, status: string}>) =>
 {
-    let roomsData: Array<{room: string, nbPlayersMax: number, nbPlayers: number, status: string}> = Array.from(params);
-    roomsData = roomsData.sort((a, b) => a.room.localeCompare(b.room)); // sort alphabetically
+    let roomsData = params.sort((a, b) => a.room.localeCompare(b.room)); // sort alphabetically
     
     // update room selector
 
@@ -141,6 +140,9 @@ socket.on('roomsList', (params: Array<{room: string, nbPlayersMax: number, nbPla
 socket.on('kickFromRoom', (params: {room: string, id: string}) => {
     if (params.id.length == 0 /* all */ || params.id == selfID)
     {
+        if (params.id == selfID)
+            alert(`You've been kicked from room '${params.room}'`);
+
         // return to welcome page
         (<HTMLParagraphElement>document.getElementById('gameSetupTitle')).innerText = `Welcome`;
         (<HTMLSelectElement>document.getElementById('joinRoomName')).selectedIndex = -1;
@@ -168,15 +170,13 @@ function onNumberInput(): void
     }
 }
 
-socket.on('updatePlayersList', (params:  Array<{id: string, name: string}>) => {
+socket.on('updatePlayersList', (params: Array<{id: string, name: string}>) => {
 
-    const divPlayersList = <HTMLDivElement>document.getElementById('playersList');
-    let playersData: Array<{id: string, name: string}> = Array.from(params);
-    
+    const divPlayersList = <HTMLDivElement>document.getElementById('playersList');    
     if (divPlayersList.children && divPlayersList.children.length > 0)
     {
         let indexPlayerCur = 0;
-        for (const playerData of playersData)
+        for (const playerData of params)
         {
             // create player options
             const divPlayer = <HTMLDivElement>divPlayersList.children.item(indexPlayerCur);
@@ -188,6 +188,7 @@ socket.on('updatePlayersList', (params:  Array<{id: string, name: string}>) => {
             {
                 divPlayer.style.fontWeight = "bold";
                 (<HTMLInputElement>divPlayer.children.item(1)).disabled = false;
+                (<HTMLInputElement>divPlayer.children.item(2)).disabled = false;
             }
 
             indexPlayerCur++;
@@ -238,6 +239,20 @@ socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRo
             inputPlayerColor.addEventListener('change', setPlayerParams);
             divPlayer.appendChild(inputPlayerColor);
 
+            // team
+            const selectPlayerTeam = <HTMLSelectElement>document.createElement('select');
+            for (let i = 1; i <= 2; i++)
+            {
+                let option = document.createElement('option');
+                option.value = i.toString();
+                option.textContent = `Team ${i}`;
+                selectPlayerTeam.appendChild(option); 
+            }
+            selectPlayerTeam.selectedIndex = -1;
+            selectPlayerTeam.disabled = true;
+            selectPlayerTeam.addEventListener('change', setPlayerParams);
+            divPlayer.appendChild(selectPlayerTeam);
+
             divPlayersList.appendChild(divPlayer);
         }
     else if (nbPlayersCur > nbPlayersMax)
@@ -276,14 +291,16 @@ function setPlayerParams()
     const divPlayer = <HTMLDivElement>document.getElementById(`params_setup_player_${selfID}`);
     const color = (<HTMLInputElement>divPlayer.children.item(1)).value;
 
-    socket.emit('setPlayerParams', {color: color}, (response: any) => {});
+    // get player team
+    const team = (<HTMLInputElement>divPlayer.children.item(2)).value;
+
+    socket.emit('setPlayerParams', {color: color, team: team}, (response: any) => {});
 }
 
 // update player params
-socket.on('updatePlayersParams', (params:  Array<{id: string, color: string}>) => {
+socket.on('updatePlayersParams', (params:  Array<{id: string, color: string, team: string}>) => {
 
-    let playersParams: Array<{id: string, color: string}> = Array.from(params);    
-    for (const playerParams of playersParams)
+    for (const playerParams of params)
     {
         const id = playerParams.id;
         if (id == selfID)
@@ -295,7 +312,10 @@ socket.on('updatePlayersParams', (params:  Array<{id: string, color: string}>) =
 
         // update other player parameters
         (<HTMLInputElement>divPlayer.children.item(1)).value = playerParams.color;
+        (<HTMLInputElement>divPlayer.children.item(2)).value = playerParams.team;
     }
+
+    updatePlayButton();
 });
 
 function updatePlayButton()
@@ -319,8 +339,24 @@ function updatePlayButton()
         if (divPlayer.id && divPlayer.id.startsWith(playerIdPrefix))
             nbPlayers++;
     }
+    const nbPlayersCorrect: boolean = (nbPlayers == nbPlayersMax);
 
-    setEnabled("buttonPlay", (nbPlayers == nbPlayersMax));
+    // get current players teams
+    let hasTeam1: boolean = false;
+    let hasTeam2: boolean = false;
+    for (const divPlayer of divPlayersList.children)
+    {
+        const team = (<HTMLInputElement>divPlayer.children.item(2)).value;
+        if (team == "1")
+            hasTeam1 = true;
+        else if (team == "2")
+            hasTeam2 = true;
+    }
+    let teamsCorrect: boolean = (hasTeam1 && hasTeam2);
+    if (nbPlayersMax == 1)
+        teamsCorrect = (hasTeam1 || hasTeam2);
+
+    setEnabled("buttonPlay", nbPlayersCorrect && teamsCorrect);
 }
 
 function onPlay()
