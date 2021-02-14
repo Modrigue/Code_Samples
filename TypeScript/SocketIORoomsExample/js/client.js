@@ -123,6 +123,8 @@ socket.on('updatePlayersList', (params) => {
             const divPlayer = divPlayersList.children.item(indexPlayerCur);
             divPlayer.id = `params_setup_player_${playerData.id}`;
             divPlayer.textContent = playerData.name;
+            if (playerData.id == selfID)
+                divPlayer.style.fontWeight = "bold";
             indexPlayerCur++;
         }
         // empty remaining player divs        

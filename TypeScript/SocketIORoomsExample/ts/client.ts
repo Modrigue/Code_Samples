@@ -173,6 +173,10 @@ socket.on('updatePlayersList', (params:  Array<{id: string, name: string}>) => {
             const divPlayer = <HTMLDivElement>divPlayersList.children.item(indexPlayerCur);
             divPlayer.id = `params_setup_player_${playerData.id}`;
             divPlayer.textContent = playerData.name;
+
+            if (playerData.id == selfID)
+                divPlayer.style.fontWeight = "bold";
+
             indexPlayerCur++;
         }
 
