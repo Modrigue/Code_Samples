@@ -46,7 +46,7 @@ io.on('connection', connected);
 //////////////////////////////// RECEIVE EVENTS ///////////////////////////////
 function connected(socket) {
     console.log(`Client '${socket.id}' connected`);
-    sendRoomsList();
+    updateRoomsList();
     const room = 1;
     //const nbPlayersReady = getNbPlayersReadyInRoom(room);
     // create new room
@@ -71,10 +71,10 @@ function connected(socket) {
         games.set(room, newGame);
         socket.join(room);
         // send updated rooms list to all clients
-        sendRoomsList();
+        updateRoomsList();
         response({ room: room });
         updateNbPlayersMax(room, 2);
-        sendPlayersList(room);
+        updatePlayersList(room);
     });
     // join room
     socket.on('joinRoom', (params, response) => {
@@ -106,7 +106,7 @@ function connected(socket) {
         const enablePlay = (game.status == GameStatus.PLAYING);
         socket.join(room);
         updateNbPlayersMax(room, game.nbPlayersMax);
-        sendPlayersList(room);
+        updatePlayersList(room);
         response({ room: room, enablePlay: enablePlay });
     });
     // max. nb. of players update
@@ -160,7 +160,7 @@ function connected(socket) {
             if (((_a = games.get(room)) === null || _a === void 0 ? void 0 : _a.status) == GameStatus.SETUP) {
                 games.delete(room);
                 console.log(`Creator '${player.name}' disconnected => Room '${room}' deleted`);
-                sendRoomsList();
+                updateRoomsList();
                 kickAllPlayersFromRoom(room);
                 return;
             }
@@ -170,8 +170,8 @@ function connected(socket) {
         if (game.players !== null && game.players.has(socket.id))
             game.players.delete(socket.id);
         deleteEmptyRooms();
-        sendRoomsList();
-        sendPlayersList(room);
+        updateRoomsList();
+        updatePlayersList(room);
     });
     socket.on('kickPlayer', (params, response) => {
         let player = getPlayerFromId(params.id);
@@ -187,11 +187,12 @@ function connected(socket) {
     });
 }
 ////////////////////////////////// SEND EVENTS ////////////////////////////////
-function sendRoomsList() {
+function updateRoomsList() {
+    let roomsData = new Array();
     const rooms = Array.from(games.keys());
     io.emit('roomsList', rooms);
 }
-function sendPlayersList(room) {
+function updatePlayersList(room) {
     if (!games.has(room))
         return;
     const game = games.get(room);

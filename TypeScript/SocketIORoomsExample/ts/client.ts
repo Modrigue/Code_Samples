@@ -160,7 +160,7 @@ function onNumberInput(): void
     }
 }
 
-socket.on('updatePlayersList', (params: any) => {
+socket.on('updatePlayersList', (params:  Array<{id: string, name: string}>) => {
 
     const divPlayersList = <HTMLDivElement>document.getElementById('playersList');
     let playersData: Array<{id: string, name: string}> = Array.from(params);
@@ -178,7 +178,7 @@ socket.on('updatePlayersList', (params: any) => {
     }
 });
 
-socket.on('updateNbPlayersMax', (params: any) => {
+socket.on('updateNbPlayersMax', (params: {room: string, nbPlayersMax: number}) => {
 
     const nbPlayersMax = params.nbPlayersMax;
     const selectNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
@@ -223,7 +223,7 @@ function onPlay()
     socket.emit('play', null, (response: any) => {});
 }
 
-socket.on('playGame', (params: any) => {
+socket.on('playGame', (params: {room: string}) => {
 
     (<HTMLParagraphElement>document.getElementById('gameTitle')).innerText
         = `Game ${params.room}`;
