@@ -3,14 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
     <title>Socket.io Rooms Example</title>
 </head>
-<style>
-    p
-    {
-        font-weight: bold;
-    }
-</style>
 <body>
     <div id="pageWelcome">
         <p>Welcome</p>
@@ -32,9 +27,9 @@
     <div id="pageGameSetup" style="display: none;">
         <p id="gameSetupTitle">Game setup</p>
         <span>Nb. of players:</span>
-        <input id="gameNbPlayers" type="number" required min=1 max=99 value=2 maxlength="2" style="width: 32px;" disabled />
+        <input id="gameNbPlayers" type="number" required min=1 max=99 value=2 maxlength="2" disabled />
         <span>Nb. of rounds:</span>
-        <input id="gameNbRounds" type="number" required min=1 max=99 value=3 maxlength="2" style="width: 32px;" disabled />
+        <input id="gameNbRounds" type="number" required min=1 max=99 value=3 maxlength="2" disabled />
         <br><br>
         <div id="playersList"> 
         </div>
