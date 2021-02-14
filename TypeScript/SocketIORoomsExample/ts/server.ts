@@ -31,7 +31,7 @@ class Player_S
     name: string = "";
 
     room: string = "";
-    color: string = "";
+    color: string = "#0000ff";
 
     creator:  boolean = false;
 }
@@ -146,6 +146,7 @@ function connected(socket: any)
         socket.join(room);
         updateRoomParams(room);
         updatePlayersList(room);
+        updatePlayersParams(room);
         updateRoomsList();
         response({ room: room, enablePlay: enablePlay });
     });
@@ -169,6 +170,27 @@ function connected(socket: any)
         }
 
         updateRoomsList();
+    });
+
+    // player parameters update
+    socket.on('setPlayerParams', (params: {color: string}, response: any) => {
+        const room = getPlayerRoomFromId(socket.id);
+        if (room.length == 0)
+            return;
+        if (!games.has(room))
+            return;
+
+        const game = <Game_S>games.get(room);
+        if (game.players && game.players.has(socket.id))
+        {
+            let player = getPlayerFromId(socket.id);
+            if (player.name.length == 0)
+                return;
+            
+            player.color = params.color;
+
+            updatePlayersParams(room);
+        }
     });
 
     // start play
@@ -313,6 +335,19 @@ function updateRoomParams(room: string)
     const game = <Game_S>games.get(room);
     io.to(room).emit('updateRoomParams',
         {room: room, nbPlayersMax: game.nbPlayersMax, nbRounds: game.nbRounds});
+}
+
+function updatePlayersParams(room: string)
+{
+    if (!games.has(room))
+        return
+
+    const game = <Game_S>games.get(room);
+    let playersParams = new Array<{id: string, color: string}>();
+    for (const [id, player] of game.players)
+        playersParams.push({id: id, color: player.color}); 
+
+    io.to(room).emit('updatePlayersParams', playersParams);
 }
 
 

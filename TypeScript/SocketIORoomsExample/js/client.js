@@ -129,9 +129,12 @@ socket.on('updatePlayersList', (params) => {
             // create player options
             const divPlayer = divPlayersList.children.item(indexPlayerCur);
             divPlayer.id = `params_setup_player_${playerData.id}`;
-            divPlayer.textContent = playerData.name;
-            if (playerData.id == selfID)
+            divPlayer.children.item(0).textContent = playerData.name;
+            // own player options
+            if (playerData.id == selfID) {
                 divPlayer.style.fontWeight = "bold";
+                divPlayer.children.item(1).disabled = false;
+            }
             indexPlayerCur++;
         }
         // empty remaining player divs        
@@ -140,7 +143,7 @@ socket.on('updatePlayersList', (params) => {
             for (let i = indexPlayerCur; i < nbPlayersMax; i++) {
                 const divPlayer = divPlayersList.children.item(i);
                 divPlayer.id = "";
-                divPlayer.textContent = "...";
+                divPlayer.children.item(0).textContent = "...";
             }
     }
     updatePlayButton();
@@ -157,7 +160,17 @@ socket.on('updateRoomParams', (params) => {
         for (let i = nbPlayersCur + 1; i <= nbPlayersMax; i++) {
             const divPlayer = document.createElement('div');
             divPlayer.id = "";
-            divPlayer.textContent = "...";
+            // name
+            const labelPlayerName = document.createElement('label');
+            labelPlayerName.textContent = "...";
+            divPlayer.appendChild(labelPlayerName);
+            // color
+            const inputPlayerColor = document.createElement('input');
+            inputPlayerColor.type = "color";
+            inputPlayerColor.value = "#0000ff";
+            inputPlayerColor.disabled = true;
+            inputPlayerColor.addEventListener('change', setPlayerParams);
+            divPlayer.appendChild(inputPlayerColor);
             divPlayersList.appendChild(divPlayer);
         }
     else if (nbPlayersCur > nbPlayersMax) {
@@ -180,6 +193,27 @@ socket.on('updateRoomParams', (params) => {
     if (selectNbRounds.disabled)
         selectNbRounds.value = params.nbRounds.toString();
     updatePlayButton();
+});
+// send player params
+function setPlayerParams() {
+    // get player color
+    const divPlayer = document.getElementById(`params_setup_player_${selfID}`);
+    const color = divPlayer.children.item(1).value;
+    socket.emit('setPlayerParams', { color: color }, (response) => { });
+}
+// update player params
+socket.on('updatePlayersParams', (params) => {
+    let playersParams = Array.from(params);
+    for (const playerParams of playersParams) {
+        const id = playerParams.id;
+        if (id == selfID)
+            continue; // nop
+        let divPlayer = document.getElementById(`params_setup_player_${id}`);
+        if (divPlayer === null)
+            continue;
+        // update other player parameters
+        divPlayer.children.item(1).value = playerParams.color;
+    }
 });
 function updatePlayButton() {
     if (!creator) {

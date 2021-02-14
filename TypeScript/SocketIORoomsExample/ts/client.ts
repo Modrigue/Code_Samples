@@ -181,10 +181,14 @@ socket.on('updatePlayersList', (params:  Array<{id: string, name: string}>) => {
             // create player options
             const divPlayer = <HTMLDivElement>divPlayersList.children.item(indexPlayerCur);
             divPlayer.id = `params_setup_player_${playerData.id}`;
-            divPlayer.textContent = playerData.name;
+            (<HTMLDivElement>divPlayer.children.item(0)).textContent = playerData.name;
 
+            // own player options
             if (playerData.id == selfID)
+            {
                 divPlayer.style.fontWeight = "bold";
+                (<HTMLInputElement>divPlayer.children.item(1)).disabled = false;
+            }
 
             indexPlayerCur++;
         }
@@ -196,7 +200,7 @@ socket.on('updatePlayersList', (params:  Array<{id: string, name: string}>) => {
             {
                 const divPlayer = <HTMLDivElement>divPlayersList.children.item(i);
                 divPlayer.id = "";
-                divPlayer.textContent ="...";
+                (<HTMLDivElement>divPlayer.children.item(0)).textContent ="...";
             }
     }
 
@@ -220,7 +224,20 @@ socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRo
         {
             const divPlayer = <HTMLDivElement>document.createElement('div');
             divPlayer.id = "";
-            divPlayer.textContent = "...";
+
+            // name
+            const labelPlayerName = <HTMLLabelElement>document.createElement('label');
+            labelPlayerName.textContent = "...";
+            divPlayer.appendChild(labelPlayerName);
+
+            // color
+            const inputPlayerColor = <HTMLInputElement>document.createElement('input');
+            inputPlayerColor.type = "color";
+            inputPlayerColor.value = "#0000ff";
+            inputPlayerColor.disabled = true;
+            inputPlayerColor.addEventListener('change', setPlayerParams);
+            divPlayer.appendChild(inputPlayerColor);
+
             divPlayersList.appendChild(divPlayer);
         }
     else if (nbPlayersCur > nbPlayersMax)
@@ -250,6 +267,35 @@ socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRo
         selectNbRounds.value = params.nbRounds.toString();
 
     updatePlayButton();
+});
+
+// send player params
+function setPlayerParams()
+{
+    // get player color
+    const divPlayer = <HTMLDivElement>document.getElementById(`params_setup_player_${selfID}`);
+    const color = (<HTMLInputElement>divPlayer.children.item(1)).value;
+
+    socket.emit('setPlayerParams', {color: color}, (response: any) => {});
+}
+
+// update player params
+socket.on('updatePlayersParams', (params:  Array<{id: string, color: string}>) => {
+
+    let playersParams: Array<{id: string, color: string}> = Array.from(params);    
+    for (const playerParams of playersParams)
+    {
+        const id = playerParams.id;
+        if (id == selfID)
+            continue; // nop
+
+        let divPlayer = <HTMLDivElement>document.getElementById(`params_setup_player_${id}`);
+        if (divPlayer === null)
+            continue;
+
+        // update other player parameters
+        (<HTMLInputElement>divPlayer.children.item(1)).value = playerParams.color;
+    }
 });
 
 function updatePlayButton()

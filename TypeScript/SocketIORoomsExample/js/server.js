@@ -23,7 +23,7 @@ class Player_S {
         this.no = 0;
         this.name = "";
         this.room = "";
-        this.color = "";
+        this.color = "#0000ff";
         this.creator = false;
     }
 }
@@ -108,6 +108,7 @@ function connected(socket) {
         socket.join(room);
         updateRoomParams(room);
         updatePlayersList(room);
+        updatePlayersParams(room);
         updateRoomsList();
         response({ room: room, enablePlay: enablePlay });
     });
@@ -126,6 +127,22 @@ function connected(socket) {
             }
         }
         updateRoomsList();
+    });
+    // player parameters update
+    socket.on('setPlayerParams', (params, response) => {
+        const room = getPlayerRoomFromId(socket.id);
+        if (room.length == 0)
+            return;
+        if (!games.has(room))
+            return;
+        const game = games.get(room);
+        if (game.players && game.players.has(socket.id)) {
+            let player = getPlayerFromId(socket.id);
+            if (player.name.length == 0)
+                return;
+            player.color = params.color;
+            updatePlayersParams(room);
+        }
     });
     // start play
     socket.on('play', (params, response) => {
@@ -230,6 +247,15 @@ function updateRoomParams(room) {
         return;
     const game = games.get(room);
     io.to(room).emit('updateRoomParams', { room: room, nbPlayersMax: game.nbPlayersMax, nbRounds: game.nbRounds });
+}
+function updatePlayersParams(room) {
+    if (!games.has(room))
+        return;
+    const game = games.get(room);
+    let playersParams = new Array();
+    for (const [id, player] of game.players)
+        playersParams.push({ id: id, color: player.color });
+    io.to(room).emit('updatePlayersParams', playersParams);
 }
 function kickPlayerFromRoom(room, id) {
     io.to(room).emit('kickFromRoom', { room: room, id: id });
