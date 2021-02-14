@@ -17,8 +17,7 @@ class Player {
 // init game
 let clientBalls = new Map();
 let selfID;
-let room = -1;
-let nbPlayersReadyInRoom = 0;
+let creator = false;
 /////////////////////////// INTERACTION WITH SERVER ///////////////////////////
 socket.on('connect', () => {
     selfID = socket.id;
@@ -74,7 +73,8 @@ function onSubmit() {
                     setVisible("pageGame", false);
                     setEnabled("gameNbPlayers", true);
                     setEnabled("gameNbRounds", true);
-                    setEnabled("buttonPlay", true);
+                    setEnabled("buttonPlay", false);
+                    creator = true;
                 }
             });
             break;
@@ -105,6 +105,7 @@ socket.on('kickFromRoom', (params) => {
         setVisible("pageWelcome", true);
         setVisible("pageGameSetup", false);
     }
+    updatePlayButton();
 });
 function onNumberInput() {
     // limit nb. of characters to max length
@@ -125,6 +126,7 @@ socket.on('updatePlayersList', (params) => {
     if (divPlayersList.children && divPlayersList.children.length > 0) {
         let indexPlayerCur = 0;
         for (const playerData of playersData) {
+            // create player options
             const divPlayer = divPlayersList.children.item(indexPlayerCur);
             divPlayer.id = `params_setup_player_${playerData.id}`;
             divPlayer.textContent = playerData.name;
@@ -141,6 +143,7 @@ socket.on('updatePlayersList', (params) => {
                 divPlayer.textContent = "...";
             }
     }
+    updatePlayButton();
 });
 socket.on('updateRoomParams', (params) => {
     // update nb. players max
@@ -176,7 +179,26 @@ socket.on('updateRoomParams', (params) => {
     const selectNbRounds = document.getElementById('gameNbRounds');
     if (selectNbRounds.disabled)
         selectNbRounds.value = params.nbRounds.toString();
+    updatePlayButton();
 });
+function updatePlayButton() {
+    if (!creator) {
+        setEnabled("buttonPlay", false);
+        return;
+    }
+    // get max. nb. players
+    const imputNbPlayers = document.getElementById('gameNbPlayers');
+    const nbPlayersMax = parseInt(imputNbPlayers.value);
+    // get current nb. players
+    let nbPlayers = 0;
+    const divPlayersList = document.getElementById('playersList');
+    for (const divPlayer of divPlayersList.children) {
+        const playerIdPrefix = 'params_setup_player_';
+        if (divPlayer.id && divPlayer.id.startsWith(playerIdPrefix))
+            nbPlayers++;
+    }
+    setEnabled("buttonPlay", (nbPlayers == nbPlayersMax));
+}
 function onPlay() {
     socket.emit('play', null, (response) => { });
 }

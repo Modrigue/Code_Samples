@@ -19,8 +19,7 @@ class Player
 // init game
 let clientBalls: Map<string, Player> = new Map<string, Player>();
 let selfID: string;
-let room = -1;
-let nbPlayersReadyInRoom = 0;
+let creator: boolean = false;
 
 
 /////////////////////////// INTERACTION WITH SERVER ///////////////////////////
@@ -102,7 +101,9 @@ function onSubmit()
 
                     setEnabled("gameNbPlayers", true);
                     setEnabled("gameNbRounds", true);
-                    setEnabled("buttonPlay", true);
+                    setEnabled("buttonPlay", false);
+
+                    creator = true;
                 }
             });
             break;
@@ -146,6 +147,8 @@ socket.on('kickFromRoom', (params: {room: string, id: string}) => {
         setVisible("pageWelcome", true);
         setVisible("pageGameSetup", false);
     }
+
+    updatePlayButton();
 });
 
 function onNumberInput(): void
@@ -175,6 +178,7 @@ socket.on('updatePlayersList', (params:  Array<{id: string, name: string}>) => {
         let indexPlayerCur = 0;
         for (const playerData of playersData)
         {
+            // create player options
             const divPlayer = <HTMLDivElement>divPlayersList.children.item(indexPlayerCur);
             divPlayer.id = `params_setup_player_${playerData.id}`;
             divPlayer.textContent = playerData.name;
@@ -195,6 +199,8 @@ socket.on('updatePlayersList', (params:  Array<{id: string, name: string}>) => {
                 divPlayer.textContent ="...";
             }
     }
+
+    updatePlayButton();
 });
 
 socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRounds: number}) => {
@@ -242,7 +248,34 @@ socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRo
     const selectNbRounds = <HTMLInputElement>document.getElementById('gameNbRounds');
     if (selectNbRounds.disabled)
         selectNbRounds.value = params.nbRounds.toString();
+
+    updatePlayButton();
 });
+
+function updatePlayButton()
+{
+    if (!creator)
+    {
+        setEnabled("buttonPlay", false);
+        return;
+    }
+
+    // get max. nb. players
+    const imputNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
+    const nbPlayersMax = <number>parseInt(imputNbPlayers.value);
+
+    // get current nb. players
+    let nbPlayers: number = 0;
+    const divPlayersList = <HTMLDivElement>document.getElementById('playersList');
+    for (const divPlayer of divPlayersList.children)
+    {
+        const playerIdPrefix = 'params_setup_player_';
+        if (divPlayer.id && divPlayer.id.startsWith(playerIdPrefix))
+            nbPlayers++;
+    }
+
+    setEnabled("buttonPlay", (nbPlayers == nbPlayersMax));
+}
 
 function onPlay()
 {
