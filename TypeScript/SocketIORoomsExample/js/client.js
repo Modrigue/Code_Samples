@@ -79,16 +79,17 @@ function onSubmit() {
     }
 }
 socket.on('roomsList', (params) => {
-    let rooms = Array.from(params);
-    rooms = rooms.sort((a, b) => a.localeCompare(b)); // sort alphabetically
+    let roomsData = Array.from(params);
+    roomsData = roomsData.sort((a, b) => a.room.localeCompare(b.room)); // sort alphabetically
     // update room selector
     const roomSelect = document.getElementById("joinRoomName");
     while (roomSelect.options.length > 0)
         roomSelect.remove(0);
-    for (const room of rooms) {
+    for (const roomData of roomsData) {
         let option = document.createElement('option');
-        option.value = room;
-        option.innerText = room;
+        option.value = roomData.room;
+        option.textContent =
+            `${roomData.room} - ${roomData.nbPlayers}/${roomData.nbPlayersMax} players - ${roomData.status}`;
         roomSelect.appendChild(option);
     }
     roomSelect.selectedIndex = -1;

@@ -107,6 +107,7 @@ function connected(socket) {
         socket.join(room);
         updateNbPlayersMax(room, game.nbPlayersMax);
         updatePlayersList(room);
+        updateRoomsList();
         response({ room: room, enablePlay: enablePlay });
     });
     // max. nb. of players update
@@ -122,6 +123,7 @@ function connected(socket) {
                 updateNbPlayersMax(room, params.nbPlayersMax);
             }
         }
+        updateRoomsList();
     });
     // start play
     socket.on('play', (params, response) => {
@@ -142,6 +144,7 @@ function connected(socket) {
                     playGame(room);
             }
         }
+        updateRoomsList();
     });
     // disconnection
     socket.on('disconnect', function () {
@@ -184,13 +187,30 @@ function connected(socket) {
             game.players.delete(params.id);
             kickPlayerFromRoom(room, params.id);
         }
+        updateRoomsList();
     });
 }
 ////////////////////////////////// SEND EVENTS ////////////////////////////////
 function updateRoomsList() {
+    var _a;
     let roomsData = new Array();
-    const rooms = Array.from(games.keys());
-    io.emit('roomsList', rooms);
+    for (const [room, game] of games) {
+        const nbPlayersCur = (_a = game.players) === null || _a === void 0 ? void 0 : _a.size;
+        let status = "";
+        switch (game.status) {
+            case GameStatus.PLAYING:
+                status = "Playing";
+                break;
+            case GameStatus.SETUP:
+                status = "Waiting";
+                break;
+            default:
+                status = "";
+                break;
+        }
+        roomsData.push({ room: room, nbPlayersMax: game.nbPlayersMax, nbPlayers: nbPlayersCur, status: status });
+    }
+    io.emit('roomsList', roomsData);
 }
 function updatePlayersList(room) {
     if (!games.has(room))

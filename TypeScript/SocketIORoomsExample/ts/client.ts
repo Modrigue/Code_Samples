@@ -107,10 +107,10 @@ function onSubmit()
     } 
 }
 
-socket.on('roomsList', (params: any) =>
+socket.on('roomsList', (params: Array<{room: string, nbPlayersMax: number, nbPlayers: number, status: string}>) =>
 {
-    let rooms: Array<string> = Array.from(params);
-    rooms = rooms.sort((a, b) => a.localeCompare(b)); // sort alphabetically
+    let roomsData: Array<{room: string, nbPlayersMax: number, nbPlayers: number, status: string}> = Array.from(params);
+    roomsData = roomsData.sort((a, b) => a.room.localeCompare(b.room)); // sort alphabetically
     
     // update room selector
 
@@ -119,11 +119,12 @@ socket.on('roomsList', (params: any) =>
     while (roomSelect.options.length > 0)         
         roomSelect.remove(0);
 
-    for (const room of rooms)
+    for (const roomData of roomsData)
     {        
         let option = document.createElement('option');
-        option.value = room;
-        option.innerText = room;
+        option.value = roomData.room;
+        option.textContent =
+            `${roomData.room} - ${roomData.nbPlayers}/${roomData.nbPlayersMax} players - ${roomData.status}`;
         roomSelect.appendChild(option);    
     }
 
