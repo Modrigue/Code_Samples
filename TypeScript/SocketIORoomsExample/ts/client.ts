@@ -134,12 +134,15 @@ socket.on('roomsList', (params: any) =>
 /////////////////////////////// GAME SETUP PAGE ///////////////////////////////
 
 
-socket.on('kickFromRoom', (params: any) => {  
-    // return to welcome page
-    (<HTMLParagraphElement>document.getElementById('gameSetupTitle')).innerText = `Welcome`;
-    (<HTMLSelectElement>document.getElementById('joinRoomName')).selectedIndex = -1;
-    setVisible("pageWelcome", true);
-    setVisible("pageGameSetup", false);
+socket.on('kickFromRoom', (params: {room: string, id: string}) => {
+    if (params.id.length == 0 /* all */ || params.id == selfID)
+    {
+        // return to welcome page
+        (<HTMLParagraphElement>document.getElementById('gameSetupTitle')).innerText = `Welcome`;
+        (<HTMLSelectElement>document.getElementById('joinRoomName')).selectedIndex = -1;
+        setVisible("pageWelcome", true);
+        setVisible("pageGameSetup", false);
+    }
 });
 
 function onNumberInput(): void
@@ -157,13 +160,62 @@ function onNumberInput(): void
     }
 }
 
+socket.on('updatePlayersList', (params: any) => {
+
+    const divPlayersList = <HTMLDivElement>document.getElementById('playersList');
+    let playersData: Array<{id: string, name: string}> = Array.from(params);
+    
+    if (divPlayersList.children && divPlayersList.children.length > 0)
+    {
+        let index = 0;
+        for (const playerData of playersData)
+        {
+            const divPlayer = <HTMLDivElement>divPlayersList.children.item(index);
+            divPlayer.id = `params_setup_player_${playerData.id}`;
+            divPlayer.textContent = playerData.name;
+            index++;
+        }
+    }
+});
+
 socket.on('updateNbPlayersMax', (params: any) => {
 
+    const nbPlayersMax = params.nbPlayersMax;
     const selectNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
-    if (!selectNbPlayers.disabled)
-        return; // creator, nop
+    if (selectNbPlayers.disabled)
+        selectNbPlayers.value = nbPlayersMax.toString();
+        
+    const divPlayersList = <HTMLDivElement>document.getElementById('playersList');
+    let nbPlayersCur = divPlayersList.children.length;
 
-    selectNbPlayers.value = params.nbPlayersMax.toString();
+    if (nbPlayersCur < nbPlayersMax)
+        for (let i = nbPlayersCur + 1; i <= nbPlayersMax; i++)
+        {
+            const divPlayer = <HTMLDivElement>document.createElement('div');
+            divPlayer.textContent = "...";
+            divPlayersList.appendChild(divPlayer);
+        }
+    else if (nbPlayersCur > nbPlayersMax)
+    {
+        // remove and kick last overnumerous connected players
+        while (nbPlayersCur > nbPlayersMax)
+        {
+            //const divPlayer = <HTMLDivElement>document.getElementById(`params_setup_player_${i}`);
+            const divPlayer = <HTMLDivElement>divPlayersList.lastChild;
+
+            // kick player if connected in room
+            const playerIdPrefix = 'params_setup_player_';
+            if (divPlayer.id && divPlayer.id.startsWith(playerIdPrefix))
+            {
+                const id: string = divPlayer.id.replace(playerIdPrefix, "");
+                //console.log("kick player", id);
+                socket.emit('kickPlayer', {id: id}, (response: any) => {});
+            }
+
+            divPlayersList.removeChild(divPlayer);
+            nbPlayersCur = divPlayersList.children.length;
+        }
+    }
 });
 
 function onPlay()

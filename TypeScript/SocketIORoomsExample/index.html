@@ -16,7 +16,7 @@
         <p>Welcome</p>
         <span>Enter your name</span>
         <input id="userName" required maxlength="12" autocomplete="off" />
-        <br>
+        <br><br>
         <input type="radio" id="radioJoinRoom" name="radioJoinCreateRoom" value="join" checked disabled>
         <label class="input-label" for="radioJoinRoom" disabled>Join room</label>
         <select id="joinRoomName" disabled></select>
@@ -33,6 +33,9 @@
         <p id="gameSetupTitle">Game setup</p>
         <span>Nb. of players:</span>
         <input id="gameNbPlayers" type="number" required min=1 max=99 value=2 maxlength="2" style="width: 32px;" disabled />
+        <br><br>
+        <div id="playersList"> 
+        </div>
         <br><br>
         <button id="buttonPlay" disabled>START GAME</button>
     </div>

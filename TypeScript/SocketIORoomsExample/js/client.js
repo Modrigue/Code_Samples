@@ -95,11 +95,13 @@ socket.on('roomsList', (params) => {
 });
 /////////////////////////////// GAME SETUP PAGE ///////////////////////////////
 socket.on('kickFromRoom', (params) => {
-    // return to welcome page
-    document.getElementById('gameSetupTitle').innerText = `Welcome`;
-    document.getElementById('joinRoomName').selectedIndex = -1;
-    setVisible("pageWelcome", true);
-    setVisible("pageGameSetup", false);
+    if (params.id.length == 0 /* all */ || params.id == selfID) {
+        // return to welcome page
+        document.getElementById('gameSetupTitle').innerText = `Welcome`;
+        document.getElementById('joinRoomName').selectedIndex = -1;
+        setVisible("pageWelcome", true);
+        setVisible("pageGameSetup", false);
+    }
 });
 function onNumberInput() {
     // limit nb. of characters to max length
@@ -112,11 +114,48 @@ function onNumberInput() {
         socket.emit('setNbPlayersMax', { nbPlayersMax: nbPlayersMax }, (response) => { });
     }
 }
+socket.on('updatePlayersList', (params) => {
+    const divPlayersList = document.getElementById('playersList');
+    let playersData = Array.from(params);
+    if (divPlayersList.children && divPlayersList.children.length > 0) {
+        let index = 0;
+        for (const playerData of playersData) {
+            const divPlayer = divPlayersList.children.item(index);
+            divPlayer.id = `params_setup_player_${playerData.id}`;
+            divPlayer.textContent = playerData.name;
+            index++;
+        }
+    }
+});
 socket.on('updateNbPlayersMax', (params) => {
+    const nbPlayersMax = params.nbPlayersMax;
     const selectNbPlayers = document.getElementById('gameNbPlayers');
-    if (!selectNbPlayers.disabled)
-        return; // creator, nop
-    selectNbPlayers.value = params.nbPlayersMax.toString();
+    if (selectNbPlayers.disabled)
+        selectNbPlayers.value = nbPlayersMax.toString();
+    const divPlayersList = document.getElementById('playersList');
+    let nbPlayersCur = divPlayersList.children.length;
+    if (nbPlayersCur < nbPlayersMax)
+        for (let i = nbPlayersCur + 1; i <= nbPlayersMax; i++) {
+            const divPlayer = document.createElement('div');
+            divPlayer.textContent = "...";
+            divPlayersList.appendChild(divPlayer);
+        }
+    else if (nbPlayersCur > nbPlayersMax) {
+        // remove and kick last overnumerous connected players
+        while (nbPlayersCur > nbPlayersMax) {
+            //const divPlayer = <HTMLDivElement>document.getElementById(`params_setup_player_${i}`);
+            const divPlayer = divPlayersList.lastChild;
+            // kick player if connected in room
+            const playerIdPrefix = 'params_setup_player_';
+            if (divPlayer.id && divPlayer.id.startsWith(playerIdPrefix)) {
+                const id = divPlayer.id.replace(playerIdPrefix, "");
+                //console.log("kick player", id);
+                socket.emit('kickPlayer', { id: id }, (response) => { });
+            }
+            divPlayersList.removeChild(divPlayer);
+            nbPlayersCur = divPlayersList.children.length;
+        }
+    }
 });
 function onPlay() {
     socket.emit('play', null, (response) => { });

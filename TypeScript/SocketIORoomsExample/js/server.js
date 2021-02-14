@@ -73,6 +73,8 @@ function connected(socket) {
         // send updated rooms list to all clients
         sendRoomsList();
         response({ room: room });
+        updateNbPlayersMax(room, 2);
+        sendPlayersList(room);
     });
     // join room
     socket.on('joinRoom', (params, response) => {
@@ -104,6 +106,7 @@ function connected(socket) {
         const enablePlay = (game.status == GameStatus.PLAYING);
         socket.join(room);
         updateNbPlayersMax(room, game.nbPlayersMax);
+        sendPlayersList(room);
         response({ room: room, enablePlay: enablePlay });
     });
     // max. nb. of players update
@@ -158,7 +161,7 @@ function connected(socket) {
                 games.delete(room);
                 console.log(`Creator '${player.name}' disconnected => Room '${room}' deleted`);
                 sendRoomsList();
-                kickPlayersFromRoom(room);
+                kickAllPlayersFromRoom(room);
                 return;
             }
         }
@@ -168,6 +171,19 @@ function connected(socket) {
             game.players.delete(socket.id);
         deleteEmptyRooms();
         sendRoomsList();
+        sendPlayersList(room);
+    });
+    socket.on('kickPlayer', (params, response) => {
+        let player = getPlayerFromId(params.id);
+        const room = getPlayerRoomFromId(params.id);
+        if (!games.has(room))
+            return;
+        // delete player in room
+        const game = games.get(room);
+        if (game.players !== null && game.players.has(params.id)) {
+            game.players.delete(params.id);
+            kickPlayerFromRoom(room, params.id);
+        }
     });
 }
 ////////////////////////////////// SEND EVENTS ////////////////////////////////
@@ -175,11 +191,25 @@ function sendRoomsList() {
     const rooms = Array.from(games.keys());
     io.emit('roomsList', rooms);
 }
+function sendPlayersList(room) {
+    if (!games.has(room))
+        return;
+    const game = games.get(room);
+    if (game.players === null)
+        return;
+    let playersData = new Array();
+    for (const [id, player] of game.players)
+        playersData.push({ id: id, name: player.name });
+    io.to(room).emit('updatePlayersList', playersData);
+}
 function updateNbPlayersMax(room, nbPlayersMax) {
     io.to(room).emit('updateNbPlayersMax', { room: room, nbPlayersMax: nbPlayersMax });
 }
-function kickPlayersFromRoom(room) {
-    io.to(room).emit('kickFromRoom', { room: room });
+function kickPlayerFromRoom(room, id) {
+    io.to(room).emit('kickFromRoom', { room: room, id: id });
+}
+function kickAllPlayersFromRoom(room) {
+    io.to(room).emit('kickFromRoom', { room: room, id: "" });
 }
 function playGame(room) {
     io.to(room).emit('playGame', { room: room });
