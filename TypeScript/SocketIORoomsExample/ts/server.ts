@@ -148,7 +148,7 @@ function connected(socket: any)
     });
 
     // max. nb. of players update
-    socket.on('setNbPlayersMax', (params: {nbPlayersMax: number, response: any) => {
+    socket.on('setNbPlayersMax', (params: {nbPlayersMax: number}, response: any) => {
         const room = getPlayerRoomFromId(socket.id);
         if (room.length == 0)
             return;
