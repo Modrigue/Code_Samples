@@ -118,13 +118,21 @@ socket.on('updatePlayersList', (params) => {
     const divPlayersList = document.getElementById('playersList');
     let playersData = Array.from(params);
     if (divPlayersList.children && divPlayersList.children.length > 0) {
-        let index = 0;
+        let indexPlayerCur = 0;
         for (const playerData of playersData) {
-            const divPlayer = divPlayersList.children.item(index);
+            const divPlayer = divPlayersList.children.item(indexPlayerCur);
             divPlayer.id = `params_setup_player_${playerData.id}`;
             divPlayer.textContent = playerData.name;
-            index++;
+            indexPlayerCur++;
         }
+        // empty remaining player divs        
+        const nbPlayersMax = divPlayersList.children.length;
+        if (indexPlayerCur < nbPlayersMax)
+            for (let i = indexPlayerCur; i < nbPlayersMax; i++) {
+                const divPlayer = divPlayersList.children.item(i);
+                divPlayer.id = "";
+                divPlayer.textContent = "...";
+            }
     }
 });
 socket.on('updateNbPlayersMax', (params) => {
@@ -137,6 +145,7 @@ socket.on('updateNbPlayersMax', (params) => {
     if (nbPlayersCur < nbPlayersMax)
         for (let i = nbPlayersCur + 1; i <= nbPlayersMax; i++) {
             const divPlayer = document.createElement('div');
+            divPlayer.id = "";
             divPlayer.textContent = "...";
             divPlayersList.appendChild(divPlayer);
         }
