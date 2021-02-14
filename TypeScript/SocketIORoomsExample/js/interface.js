@@ -3,7 +3,7 @@ window.onload = function () {
     // start on welcome page
     setVisible("pageGameSetup", false);
     const userName = document.getElementById('userName');
-    userName.addEventListener('input', updateGUI);
+    userName.addEventListener('input', updateWelcomeGUI);
     userName.focus();
     // welcome page
     const radioJoin = document.getElementById('radioJoinRoom');
@@ -12,8 +12,8 @@ window.onload = function () {
     radioCreate.addEventListener('change', selectCreateRoom);
     const joinRoomName = document.getElementById('joinRoomName');
     const createRoomName = document.getElementById('createRoomName');
-    joinRoomName.addEventListener('input', updateGUI);
-    createRoomName.addEventListener('input', updateGUI);
+    joinRoomName.addEventListener('input', updateWelcomeGUI);
+    createRoomName.addEventListener('input', updateWelcomeGUI);
     joinRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
     createRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
     const buttonSubmit = document.getElementById('buttonSubmit');
@@ -27,7 +27,7 @@ window.onload = function () {
     const buttonPlay = document.getElementById('buttonPlay');
     buttonPlay.addEventListener('click', onPlay);
 };
-function updateGUI() {
+function updateWelcomeGUI() {
     const userName = document.getElementById('userName');
     const nameEmpty = (userName.value === null || userName.value.length == 0);
     const mode = getSelectedRoomMode();
@@ -43,13 +43,13 @@ function updateGUI() {
     document.getElementById('buttonSubmit').disabled = (nameEmpty || room.length == 0);
 }
 function selectJoinRoom() {
-    updateGUI();
+    updateWelcomeGUI();
     const joinRoomName = document.getElementById('joinRoomName');
     if (!joinRoomName.disabled)
         joinRoomName.focus();
 }
 function selectCreateRoom() {
-    updateGUI();
+    updateWelcomeGUI();
     const createRoomName = document.getElementById('createRoomName');
     if (!createRoomName.disabled)
         createRoomName.focus();

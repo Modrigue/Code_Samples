@@ -4,7 +4,7 @@ window.onload = function()
     setVisible("pageGameSetup", false);
 
     const userName = <HTMLInputElement>document.getElementById('userName');
-    userName.addEventListener('input', updateGUI)
+    userName.addEventListener('input', updateWelcomeGUI)
     userName.focus();
 
     // welcome page
@@ -16,8 +16,8 @@ window.onload = function()
 
     const joinRoomName = <HTMLSelectElement>document.getElementById('joinRoomName');
     const createRoomName = <HTMLInputElement>document.getElementById('createRoomName');
-    joinRoomName.addEventListener('input', updateGUI);
-    createRoomName.addEventListener('input', updateGUI);
+    joinRoomName.addEventListener('input', updateWelcomeGUI);
+    createRoomName.addEventListener('input', updateWelcomeGUI);
     joinRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
     createRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
 
@@ -36,7 +36,7 @@ window.onload = function()
     buttonPlay.addEventListener('click', onPlay);
 }
 
-function updateGUI()
+function updateWelcomeGUI()
 {
     const userName = <HTMLInputElement>document.getElementById('userName');
     const nameEmpty: boolean = (userName.value === null || userName.value.length == 0);
@@ -58,7 +58,7 @@ function updateGUI()
 
 function selectJoinRoom()
 {
-    updateGUI();
+    updateWelcomeGUI();
     const joinRoomName = <HTMLSelectElement>document.getElementById('joinRoomName');
 
     if (!joinRoomName.disabled)
@@ -67,7 +67,7 @@ function selectJoinRoom()
 
 function selectCreateRoom()
 {
-    updateGUI();
+    updateWelcomeGUI();
     const createRoomName = <HTMLInputElement>document.getElementById('createRoomName');
 
     if (!createRoomName.disabled)
