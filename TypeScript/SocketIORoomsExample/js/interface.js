@@ -19,8 +19,10 @@ window.onload = function () {
     const buttonSubmit = document.getElementById('buttonSubmit');
     buttonSubmit.addEventListener('click', onSubmit);
     // game setup page
-    const selectNbPlayers = document.getElementById('gameNbPlayers');
-    selectNbPlayers.addEventListener('input', onNumberInput);
+    const inputNbPlayers = document.getElementById('gameNbPlayers');
+    inputNbPlayers.addEventListener('input', onNumberInput);
+    const inputNbRounds = document.getElementById('gameNbRounds');
+    inputNbRounds.addEventListener('input', onNumberInput);
     // game page
     const buttonPlay = document.getElementById('buttonPlay');
     buttonPlay.addEventListener('click', onPlay);

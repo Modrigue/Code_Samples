@@ -73,6 +73,7 @@ function onSubmit()
                     setVisible("pageGame", false);
 
                     setEnabled("gameNbPlayers", false);
+                    setEnabled("gameNbRounds", false);
                     setEnabled("buttonPlay", response.enablePlay);
                     (<HTMLButtonElement>document.getElementById('buttonPlay')).innerText
                         = response.enablePlay ? "JOIN GAME" : "START GAME";
@@ -100,6 +101,7 @@ function onSubmit()
                     setVisible("pageGame", false);
 
                     setEnabled("gameNbPlayers", true);
+                    setEnabled("gameNbRounds", true);
                     setEnabled("buttonPlay", true);
                 }
             });
@@ -153,11 +155,13 @@ function onNumberInput(): void
         this.value = this.value.slice(0, this.maxLength);
 
     // update max. nb. players in room
-    const selectNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
-    if (!selectNbPlayers.disabled)
+    const imputNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
+    const inputNbRounds = <HTMLInputElement>document.getElementById('gameNbRounds');
+    if (!imputNbPlayers.disabled && !inputNbRounds.disabled)
     {
-        const nbPlayersMax = <number>parseInt(selectNbPlayers.value);
-        socket.emit('setNbPlayersMax', {nbPlayersMax: nbPlayersMax}, (response: any) => {});
+        const nbPlayersMax = <number>parseInt(imputNbPlayers.value);
+        const nbRounds = <number>parseInt(inputNbRounds.value);
+        socket.emit('setRoomParams', {nbPlayersMax: nbPlayersMax, nbRounds: nbRounds}, (response: any) => {});
     }
 }
 
@@ -193,7 +197,9 @@ socket.on('updatePlayersList', (params:  Array<{id: string, name: string}>) => {
     }
 });
 
-socket.on('updateNbPlayersMax', (params: {room: string, nbPlayersMax: number}) => {
+socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRounds: number}) => {
+
+    // update nb. players max
 
     const nbPlayersMax = params.nbPlayersMax;
     const selectNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
@@ -216,7 +222,6 @@ socket.on('updateNbPlayersMax', (params: {room: string, nbPlayersMax: number}) =
         // remove and kick last overnumerous connected players
         while (nbPlayersCur > nbPlayersMax)
         {
-            //const divPlayer = <HTMLDivElement>document.getElementById(`params_setup_player_${i}`);
             const divPlayer = <HTMLDivElement>divPlayersList.lastChild;
 
             // kick player if connected in room
@@ -232,6 +237,11 @@ socket.on('updateNbPlayersMax', (params: {room: string, nbPlayersMax: number}) =
             nbPlayersCur = divPlayersList.children.length;
         }
     }
+
+    // update nb. rounds
+    const selectNbRounds = <HTMLInputElement>document.getElementById('gameNbRounds');
+    if (selectNbRounds.disabled)
+        selectNbRounds.value = params.nbRounds.toString();
 });
 
 function onPlay()

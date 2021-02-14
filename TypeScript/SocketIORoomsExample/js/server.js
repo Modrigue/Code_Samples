@@ -35,8 +35,9 @@ var GameStatus;
 })(GameStatus || (GameStatus = {}));
 class Game_S {
     constructor() {
-        this.nbPlayersMax = 2; // default
+        this.nbPlayersMax = 2;
         this.players = new Map();
+        this.nbRounds = 3;
         this.status = GameStatus.NONE;
     }
 }
@@ -73,7 +74,7 @@ function connected(socket) {
         // send updated rooms list to all clients
         updateRoomsList();
         response({ room: room });
-        updateNbPlayersMax(room, 2);
+        updateRoomParams(room);
         updatePlayersList(room);
     });
     // join room
@@ -105,13 +106,13 @@ function connected(socket) {
         // enable play button if game already on
         const enablePlay = (game.status == GameStatus.PLAYING);
         socket.join(room);
-        updateNbPlayersMax(room, game.nbPlayersMax);
+        updateRoomParams(room);
         updatePlayersList(room);
         updateRoomsList();
         response({ room: room, enablePlay: enablePlay });
     });
     // max. nb. of players update
-    socket.on('setNbPlayersMax', (params, response) => {
+    socket.on('setRoomParams', (params, response) => {
         const room = getPlayerRoomFromId(socket.id);
         if (room.length == 0)
             return;
@@ -120,7 +121,8 @@ function connected(socket) {
             const game = games.get(room);
             if (game.status != GameStatus.PLAYING) {
                 game.nbPlayersMax = params.nbPlayersMax;
-                updateNbPlayersMax(room, params.nbPlayersMax);
+                game.nbRounds = params.nbRounds;
+                updateRoomParams(room);
             }
         }
         updateRoomsList();
@@ -223,8 +225,11 @@ function updatePlayersList(room) {
         playersData.push({ id: id, name: player.name });
     io.to(room).emit('updatePlayersList', playersData);
 }
-function updateNbPlayersMax(room, nbPlayersMax) {
-    io.to(room).emit('updateNbPlayersMax', { room: room, nbPlayersMax: nbPlayersMax });
+function updateRoomParams(room) {
+    if (!games.has(room))
+        return;
+    const game = games.get(room);
+    io.to(room).emit('updateRoomParams', { room: room, nbPlayersMax: game.nbPlayersMax, nbRounds: game.nbRounds });
 }
 function kickPlayerFromRoom(room, id) {
     io.to(room).emit('kickFromRoom', { room: room, id: id });

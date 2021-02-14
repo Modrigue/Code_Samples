@@ -26,8 +26,10 @@ window.onload = function()
 
     // game setup page
 
-    const selectNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
-    selectNbPlayers.addEventListener('input', onNumberInput);
+    const inputNbPlayers = <HTMLInputElement>document.getElementById('gameNbPlayers');
+    inputNbPlayers.addEventListener('input', onNumberInput);
+    const inputNbRounds = <HTMLInputElement>document.getElementById('gameNbRounds');
+    inputNbRounds.addEventListener('input', onNumberInput);
 
     // game page
     const buttonPlay = <HTMLButtonElement>document.getElementById('buttonPlay');

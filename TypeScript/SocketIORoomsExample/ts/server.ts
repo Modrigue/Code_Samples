@@ -45,8 +45,10 @@ enum GameStatus
 
 class Game_S
 {
-    nbPlayersMax: number = 2; // default
+    nbPlayersMax: number = 2;
     players: Map<string, Player_S> = new Map<string, Player_S>();
+
+    nbRounds: number = 3;
 
     status: GameStatus = GameStatus.NONE;
 }
@@ -100,7 +102,7 @@ function connected(socket: any)
         updateRoomsList();
         response({ room: room });
 
-        updateNbPlayersMax(room, 2);
+        updateRoomParams(room);
         updatePlayersList(room);
     });
 
@@ -142,14 +144,14 @@ function connected(socket: any)
         const enablePlay: boolean = (game.status == GameStatus.PLAYING);
 
         socket.join(room);
-        updateNbPlayersMax(room, game.nbPlayersMax);
+        updateRoomParams(room);
         updatePlayersList(room);
         updateRoomsList();
         response({ room: room, enablePlay: enablePlay });
     });
 
     // max. nb. of players update
-    socket.on('setNbPlayersMax', (params: {nbPlayersMax: number}, response: any) => {
+    socket.on('setRoomParams', (params: {nbPlayersMax: number, nbRounds: number}, response: any) => {
         const room = getPlayerRoomFromId(socket.id);
         if (room.length == 0)
             return;
@@ -161,7 +163,8 @@ function connected(socket: any)
             if (game.status != GameStatus.PLAYING)
             {
                 game.nbPlayersMax = params.nbPlayersMax;
-                updateNbPlayersMax(room, params.nbPlayersMax);
+                game.nbRounds = params.nbRounds;
+                updateRoomParams(room);
             }
         }
 
@@ -302,9 +305,14 @@ function updatePlayersList(room: string)
     io.to(room).emit('updatePlayersList', playersData);
 }
 
-function updateNbPlayersMax(room: string, nbPlayersMax: number)
+function updateRoomParams(room: string)
 {
-    io.to(room).emit('updateNbPlayersMax', {room: room, nbPlayersMax: nbPlayersMax});
+    if (!games.has(room))
+        return
+
+    const game = <Game_S>games.get(room);
+    io.to(room).emit('updateRoomParams',
+        {room: room, nbPlayersMax: game.nbPlayersMax, nbRounds: game.nbRounds});
 }
 
 
