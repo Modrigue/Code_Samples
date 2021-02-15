@@ -179,8 +179,8 @@ socket.on('updatePlayersList', (params: Array<{id: string, name: string}>) => {
             if (playerData.id == selfID)
             {
                 divPlayer.style.fontWeight = "bold";
-                (<HTMLInputElement>divPlayer.children.item(1)).disabled = false;
-                (<HTMLInputElement>divPlayer.children.item(2)).disabled = false;
+                for (let i = 1; i < divPlayer.children.length; i++)
+                    (<HTMLInputElement>divPlayer.children.item(i)).disabled = false;
             }
 
             indexPlayerCur++;
@@ -245,6 +245,14 @@ socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRo
             selectPlayerTeam.addEventListener('change', setPlayerParams);
             divPlayer.appendChild(selectPlayerTeam);
 
+            // ready
+            const checkboxReady = <HTMLInputElement>document.createElement('input');
+            checkboxReady.type = "checkbox";
+            checkboxReady.textContent = "Ready";
+            checkboxReady.disabled = true;
+            checkboxReady.addEventListener('change', setPlayerParams);
+            divPlayer.appendChild(checkboxReady);
+
             divPlayersList.appendChild(divPlayer);
         }
     else if (nbPlayersCur > nbPlayersMax)
@@ -286,11 +294,14 @@ function setPlayerParams()
     // get player team
     const team = (<HTMLInputElement>divPlayer.children.item(2)).value;
 
-    socket.emit('setPlayerParams', {color: color, team: team}, (response: any) => {});
+    // player ready?
+    const ready = (<HTMLInputElement>divPlayer.children.item(3)).checked;
+
+    socket.emit('setPlayerParams', {color: color, team: team, ready: ready}, (response: any) => {});
 }
 
 // update player params
-socket.on('updatePlayersParams', (params:  Array<{id: string, color: string, team: string}>) => {
+socket.on('updatePlayersParams', (params:  Array<{id: string, color: string, team: string, ready: boolean}>) => {
 
     for (const playerParams of params)
     {
@@ -304,7 +315,8 @@ socket.on('updatePlayersParams', (params:  Array<{id: string, color: string, tea
 
         // update other player parameters
         (<HTMLInputElement>divPlayer.children.item(1)).value = playerParams.color;
-        (<HTMLInputElement>divPlayer.children.item(2)).value = playerParams.team;
+        (<HTMLSelectElement>divPlayer.children.item(2)).value = playerParams.team;
+        (<HTMLInputElement>divPlayer.children.item(3)).checked = playerParams.ready;
     }
 
     updatePlayButton();
@@ -338,7 +350,7 @@ function updatePlayButton()
     let hasTeam2: boolean = false;
     for (const divPlayer of divPlayersList.children)
     {
-        const team = (<HTMLInputElement>divPlayer.children.item(2)).value;
+        const team = (<HTMLSelectElement>divPlayer.children.item(2)).value;
         if (team == "1")
             hasTeam1 = true;
         else if (team == "2")
@@ -348,7 +360,12 @@ function updatePlayButton()
     if (nbPlayersMax == 1)
         teamsCorrect = (hasTeam1 || hasTeam2);
 
-    setEnabled("buttonPlay", nbPlayersCorrect && teamsCorrect);
+    // get ready states
+    let ready: boolean = true;
+    for (const divPlayer of divPlayersList.children)
+        ready &&= (<HTMLInputElement>divPlayer.children.item(3)).checked;
+
+    setEnabled("buttonPlay", nbPlayersCorrect && teamsCorrect && ready);
 }
 
 function onPlay()

@@ -25,6 +25,7 @@ class Player_S {
         this.room = "";
         this.color = "#0000ff";
         this.team = "";
+        this.ready = false;
         this.creator = false;
     }
 }
@@ -143,6 +144,7 @@ function connected(socket) {
                 return;
             player.color = params.color;
             player.team = params.team;
+            player.ready = params.ready;
             updatePlayersParams(room);
         }
     });
@@ -256,7 +258,7 @@ function updatePlayersParams(room) {
     const game = games.get(room);
     let playersParams = new Array();
     for (const [id, player] of game.players)
-        playersParams.push({ id: id, color: player.color, team: player.team });
+        playersParams.push({ id: id, color: player.color, team: player.team, ready: player.ready });
     io.to(room).emit('updatePlayersParams', playersParams);
 }
 function kickPlayerFromRoom(room, id) {

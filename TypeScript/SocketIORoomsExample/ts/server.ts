@@ -33,6 +33,7 @@ class Player_S
     room: string = "";
     color: string = "#0000ff";
     team: string = "";
+    ready: boolean = false;
 
     creator:  boolean = false;
 }
@@ -174,7 +175,7 @@ function connected(socket: any)
     });
 
     // player parameters update
-    socket.on('setPlayerParams', (params: {color: string, team: string}, response: any) => {
+    socket.on('setPlayerParams', (params: {color: string, team: string, ready: boolean}, response: any) => {
         const room = getPlayerRoomFromId(socket.id);
         if (room.length == 0)
             return;
@@ -190,6 +191,7 @@ function connected(socket: any)
             
             player.color = params.color;
             player.team = params.team;
+            player.ready = params.ready;
             
             updatePlayersParams(room);
         }
@@ -345,9 +347,9 @@ function updatePlayersParams(room: string)
         return
 
     const game = <Game_S>games.get(room);
-    let playersParams = new Array<{id: string, color: string, team: string}>();
+    let playersParams = new Array<{id: string, color: string, team: string, ready: boolean}>();
     for (const [id, player] of game.players)
-        playersParams.push({id: id, color: player.color, team: player.team}); 
+        playersParams.push({id: id, color: player.color, team: player.team, ready: player.ready}); 
 
     io.to(room).emit('updatePlayersParams', playersParams);
 }
