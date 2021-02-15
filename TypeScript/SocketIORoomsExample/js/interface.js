@@ -12,10 +12,12 @@ window.onload = function () {
     radioCreate.addEventListener('change', selectCreateRoom);
     const joinRoomName = document.getElementById('joinRoomName');
     const createRoomName = document.getElementById('createRoomName');
+    const passwordRoom = document.getElementById('password');
     joinRoomName.addEventListener('input', updateWelcomeGUI);
     createRoomName.addEventListener('input', updateWelcomeGUI);
-    joinRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
-    createRoomName.addEventListener('keydown', (e) => onJoinCreateRoomKeyDown(e));
+    joinRoomName.addEventListener('keydown', (e) => onRoomInputKeyDown(e));
+    createRoomName.addEventListener('keydown', (e) => onRoomInputKeyDown(e));
+    passwordRoom.addEventListener('keydown', (e) => onRoomInputKeyDown(e));
     const buttonSubmit = document.getElementById('buttonSubmit');
     buttonSubmit.addEventListener('click', onSubmit);
     // game setup page
@@ -40,7 +42,9 @@ function updateWelcomeGUI() {
     const createRoomName = document.getElementById('createRoomName');
     createRoomName.disabled = nameEmpty || (mode == "join");
     let room = getSelectedRoomName();
-    document.getElementById('buttonSubmit').disabled = (nameEmpty || room.length == 0);
+    const roomReady = !(nameEmpty || room.length == 0);
+    document.getElementById('buttonSubmit').disabled = !roomReady;
+    document.getElementById('password').disabled = !roomReady;
 }
 function selectJoinRoom() {
     updateWelcomeGUI();
@@ -54,7 +58,7 @@ function selectCreateRoom() {
     if (!createRoomName.disabled)
         createRoomName.focus();
 }
-function onJoinCreateRoomKeyDown(e) {
+function onRoomInputKeyDown(e) {
     switch (e.key) {
         case 'Enter':
             onSubmit();

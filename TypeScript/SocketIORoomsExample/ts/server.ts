@@ -52,6 +52,7 @@ class Game_S
 
     nbRounds: number = 3;
 
+    password: string = "";
     status: GameStatus = GameStatus.NONE;
 }
 
@@ -73,7 +74,7 @@ function connected(socket: any)
     //const nbPlayersReady = getNbPlayersReadyInRoom(room);
     
     // create new room
-    socket.on('createNewRoom', (params: {name: string, room: string}, response: any) =>
+    socket.on('createNewRoom', (params: {name: string, room: string, password: string}, response: any) =>
     {
         const room = params.room;
         console.log(`Client '${socket.id}' - '${params.name}' asks to create room '${room}'`);
@@ -96,6 +97,7 @@ function connected(socket: any)
 
         let newGame = new Game_S();
         newGame.players.set(socket.id, creator);
+        newGame.password = params.password;
         newGame.status = GameStatus.SETUP;
         games.set(room, newGame);
         socket.join(room);
@@ -109,7 +111,7 @@ function connected(socket: any)
     });
 
     // join room
-    socket.on('joinRoom', (params: {name: string, room: string}, response: any) =>
+    socket.on('joinRoom', (params: {name: string, room: string, password: string}, response: any) =>
     {
         const room = params.room;
 
@@ -121,10 +123,30 @@ function connected(socket: any)
                 });
             return;
         }
+
+        // check password if existing
+        let game = <Game_S>games.get(room);
+        if (game.password && game.password.length > 0)
+        {
+            if (params.password.length == 0)
+            {
+                response({
+                    error: `Room '${room}' is password-protected.`
+                    });
+                return;
+            }
+            else if (params.password != game.password)
+            {
+                response({
+                    error: `Wrong password for room '${room}'.`
+                    });
+                return;
+            }
+        }
         
         // check nb. of players left
-        const nbPlayersCur = <number>games.get(room)?.players.size;
-        const nbPlayersMax = <number>games.get(room)?.nbPlayersMax;
+        const nbPlayersCur = game.players.size;
+        const nbPlayersMax = game.nbPlayersMax;
         if (nbPlayersCur >= nbPlayersMax)
         {
             response({
@@ -139,7 +161,6 @@ function connected(socket: any)
         player.name = params.name;
         player.room = room;
 
-        let game = <Game_S>games.get(room);
         game.players.set(socket.id, player);
 
         // enable play button if game already on

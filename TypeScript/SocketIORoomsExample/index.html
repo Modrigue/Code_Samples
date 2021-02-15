@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    <title>Socket.io Rooms Example</title>
+    <title>Socket.io Rooms GUI</title>
 </head>
 <body>
     <div id="pageWelcome">
@@ -19,6 +19,9 @@
         <input type="radio" id="radioCreateRoom" name="radioJoinCreateRoom" value="create" disabled>
         <label class="input-label" for="radioCreateRoom" disabled>Create new room</label>
         <input id="createRoomName" required maxlength="24" autocomplete="off" disabled />
+        <br>
+        <span>Password</span>
+        <input id="password" type="password" maxlength="12" autocomplete="off" />
         <br><br>
         <button id="buttonSubmit" disabled>GO</button>
 

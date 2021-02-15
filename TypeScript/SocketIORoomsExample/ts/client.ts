@@ -39,16 +39,18 @@ function onSubmit()
         return;
     }
 
+    const password = (<HTMLInputElement>document.getElementById('password')).value;
+
     const mode: string = getSelectedRoomMode();
     switch (mode)
     {
         case 'join':
-            socket.emit('joinRoom', {name: userName, room: room}, (response: any) => {
+            socket.emit('joinRoom', {name: userName, room: room, password: password}, (response: any) => {
         
                 if (response.error)
                 {
                     alert(response.error);
-                    (<HTMLSelectElement>document.getElementById('joinRoomName')).selectedIndex = -1;
+                    //(<HTMLSelectElement>document.getElementById('joinRoomName')).selectedIndex = -1;
                     return;
                 }
                 else if (response.room)
@@ -73,7 +75,7 @@ function onSubmit()
             break;
     
         case 'create':
-            socket.emit('createNewRoom', {name: userName, room: room}, (response: any) => {
+            socket.emit('createNewRoom', {name: userName, room: room, password: password}, (response: any) => {
         
                 if (response.error)
                 {
