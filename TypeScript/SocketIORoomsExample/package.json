@@ -1,5 +1,5 @@
 {
-  "name": "socket-io-rooms-exxample",
+  "name": "socket-io-rooms-gui",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
