@@ -378,6 +378,9 @@ function updatePlayersParams(room: string)
 
 function kickPlayerFromRoom(room: string, id: string)
 {
+    if (!games.has(room))
+        return
+
     io.to(room).emit('kickFromRoom', {room: room, id: id});
 }
 
@@ -388,7 +391,11 @@ function kickAllPlayersFromRoom(room: string)
 
 function playGame(room: string)
 {
-    io.to(room).emit('playGame', {room: room});
+    if (!games.has(room))
+        return
+
+    const game = <Game_S>games.get(room);
+    io.to(room).emit('playGame', {room: room, nbPlayersMax: game.nbPlayersMax, nbRounds : game.nbRounds});
 }
 
 

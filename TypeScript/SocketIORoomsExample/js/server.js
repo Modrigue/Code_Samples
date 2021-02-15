@@ -278,13 +278,18 @@ function updatePlayersParams(room) {
     io.to(room).emit('updatePlayersParams', playersParams);
 }
 function kickPlayerFromRoom(room, id) {
+    if (!games.has(room))
+        return;
     io.to(room).emit('kickFromRoom', { room: room, id: id });
 }
 function kickAllPlayersFromRoom(room) {
     io.to(room).emit('kickFromRoom', { room: room, id: "" });
 }
 function playGame(room) {
-    io.to(room).emit('playGame', { room: room });
+    if (!games.has(room))
+        return;
+    const game = games.get(room);
+    io.to(room).emit('playGame', { room: room, nbPlayersMax: game.nbPlayersMax, nbRounds: game.nbRounds });
 }
 ////////////////////////////////////// HELPERS ////////////////////////////////
 // delete empty rooms
