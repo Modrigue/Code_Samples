@@ -7,43 +7,59 @@
     <title>Socket.io Rooms GUI</title>
 </head>
 <body>
-    <div id="pageWelcome">
+    <div id="pageWelcome" class="center">
         <p>Welcome</p>
-        <span>Enter your name</span>
-        <input id="userName" required maxlength="12" autocomplete="off" />
-        <br><br>
-        <input type="radio" id="radioJoinRoom" name="radioJoinCreateRoom" value="join" checked disabled>
-        <label class="input-label" for="radioJoinRoom" disabled>Join room</label>
-        <select id="joinRoomName" disabled></select>
-        <br>
-        <input type="radio" id="radioCreateRoom" name="radioJoinCreateRoom" value="create" disabled>
-        <label class="input-label" for="radioCreateRoom" disabled>Create new room</label>
-        <input id="createRoomName" required maxlength="24" autocomplete="off" disabled />
-        <br>
-        <span>Password</span>
-        <input id="password" type="password" maxlength="12" autocomplete="off" />
-        <br><br>
-        <button id="buttonSubmit" disabled>GO</button>
+        <div class="grid2Cols">
+            <div><span>Enter your name</span></div>
+            <div><input id="userName" required maxlength="12" autocomplete="off" /></div>
+            <div><br></div>
+            <div></div>
+        
+            <div>
+                <input type="radio" id="radioJoinRoom" name="radioJoinCreateRoom" value="join" checked disabled>
+                <label class="input-label" for="radioJoinRoom" disabled>Join room</label>
+            </div>
+            <div><select id="joinRoomName" disabled></select></div>
+        
+            <div>
+                <input type="radio" id="radioCreateRoom" name="radioJoinCreateRoom" value="create" disabled>
+                <label class="input-label" for="radioCreateRoom" disabled>Create new room</label>
+            </div>
+            <div><input id="createRoomName" required maxlength="24" autocomplete="off" disabled /></div>
 
+            <div><span>Password</span></div>
+            <div><input id="password" type="password" maxlength="12" autocomplete="off" /></div>
+        </div>
+        <br>
+        <button id="buttonSubmit" class="center" disabled>GO</button>
     </div>
 
     <div id="pageGameSetup" style="display: none;">
-        <p id="gameSetupTitle">Game setup</p>
-        <span>Nb. of players:</span>
-        <input id="gameNbPlayers" type="number" required min=1 max=99 value=2 maxlength="2" disabled />
-        <span>Nb. of rounds:</span>
-        <input id="gameNbRounds" type="number" required min=1 max=99 value=3 maxlength="2" disabled />
-        <br><br>
-        <div id="playersList"> 
+        <p id="gameSetupTitle" class="center">Game setup</p>
+        <div class="center">
+            <input id="gameNbPlayers" type="number" required min=1 max=99 value=2 maxlength="2" disabled />
+            <span> players</span>
+            <br>
+            <input id="gameNbRounds" type="number" required min=1 max=99 value=3 maxlength="2" disabled />
+            <span> rounds</span>
+        </div>
+        <br>
+        <div id="playersList" class="grid4Cols">
+            <div>Name</div>
+            <div>Color</div>
+            <div>Team</div>
+            <div>Ready</div>
         </div>
         <br><br>
-        <button id="buttonPlay" disabled>START GAME</button>
+        <div class="center">
+            <button id="buttonPlay"disabled>START GAME</button>
+        </div>
     </div>
 
     <div id="pageGame" style="display: none;">
-        <p id="gameTitle">Game</p>
-        <div id="gameTeam1"></div>
-        <div id="gameTeam2"></div>
+        <p id="gameTitle" class="center">Game</p>
+        <div id="gameTeam1" class="center"></div>
+        <div id="gameTeam2" class="center"></div>
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.js"></script>

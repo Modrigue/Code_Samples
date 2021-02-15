@@ -160,6 +160,9 @@ function onNumberInput(): void
     {
         const nbPlayersMax = <number>parseInt(imputNbPlayers.value);
         const nbRounds = <number>parseInt(inputNbRounds.value);
+        if (nbPlayersMax == 0 || nbRounds == 0)
+            return; // nop
+
         socket.emit('setRoomParams', {nbPlayersMax: nbPlayersMax, nbRounds: nbRounds}, (response: any) => {});
     }
 }
@@ -169,33 +172,67 @@ socket.on('updatePlayersList', (params: Array<{id: string, name: string}>) => {
     const divPlayersList = <HTMLDivElement>document.getElementById('playersList');    
     if (divPlayersList.children && divPlayersList.children.length > 0)
     {
-        let indexPlayerCur = 0;
+        let indexPlayerCur = 1;
+        
         for (const playerData of params)
         {
-            // create player options
-            const divPlayer = <HTMLDivElement>divPlayersList.children.item(indexPlayerCur);
-            divPlayer.id = `params_setup_player_${playerData.id}`;
-            (<HTMLDivElement>divPlayer.children.item(0)).textContent = playerData.name;
+            // update player name
+            const divPlayerName = <HTMLDivElement>divPlayersList.children.item(4*indexPlayerCur);
+            divPlayerName.id = `setup_player_name_${playerData.id}`;
+            (<HTMLLabelElement>divPlayerName.children.item(0)).textContent = playerData.name;
 
-            // own player options
+            // enable own player options
+            let disableParam: boolean = true;
             if (playerData.id == selfID)
             {
-                divPlayer.style.fontWeight = "bold";
-                for (let i = 1; i < divPlayer.children.length; i++)
-                    (<HTMLInputElement>divPlayer.children.item(i)).disabled = false;
+                divPlayerName.style.fontWeight = "bold";
+                disableParam = false;
             }
+                
+            // player color
+            const divPlayerColor = <HTMLDivElement>divPlayersList.children.item(4*indexPlayerCur + 1);
+            divPlayerColor.id = `setup_player_color_${playerData.id}`;
+            (<HTMLInputElement>divPlayerColor.children.item(0)).disabled = disableParam;
 
+            // player team
+            const divPlayerTeam = <HTMLDivElement>divPlayersList.children.item(4*indexPlayerCur + 2);
+            divPlayerTeam.id = `setup_player_team_${playerData.id}`;
+            (<HTMLSelectElement>divPlayerTeam.children.item(0)).disabled = disableParam;
+
+            // player ready
+            const divPlayerReady = <HTMLDivElement>divPlayersList.children.item(4*indexPlayerCur + 3);
+            divPlayerReady.id = `setup_player_ready_${playerData.id}`;
+            (<HTMLInputElement>divPlayerReady.children.item(0)).disabled = disableParam;
+            
             indexPlayerCur++;
         }
 
         // empty remaining player divs        
-        const nbPlayersMax = divPlayersList.children.length;
-        if (indexPlayerCur < nbPlayersMax)
-            for (let i = indexPlayerCur; i < nbPlayersMax; i++)
+        const nbPlayersMax = Math.floor(divPlayersList.children.length/4) - 1;
+        if (indexPlayerCur < nbPlayersMax + 1)
+            for (let i = indexPlayerCur; i < nbPlayersMax + 1; i++)
             {
-                const divPlayer = <HTMLDivElement>divPlayersList.children.item(i);
-                divPlayer.id = "";
-                (<HTMLDivElement>divPlayer.children.item(0)).textContent ="...";
+                // player name
+                const divPlayerName = <HTMLDivElement>divPlayersList.children.item(4*i);
+                divPlayerName.id = "";
+                (<HTMLLabelElement>divPlayerName.children.item(0)).textContent ="...";
+
+                // player color
+                const divPlayerColor = <HTMLDivElement>divPlayersList.children.item(4*i + 1);
+                divPlayerColor.id = "";
+                (<HTMLInputElement>divPlayerColor.children.item(0)).disabled = true;
+
+                // player team
+                const divPlayerTeam = <HTMLDivElement>divPlayersList.children.item(4*i + 2);
+                divPlayerTeam.id = "";
+                (<HTMLSelectElement>divPlayerTeam.children.item(0)).selectedIndex = -1;
+                (<HTMLSelectElement>divPlayerTeam.children.item(0)).disabled = true;
+
+                // player ready
+                const divPlayerReady = <HTMLDivElement>divPlayersList.children.item(4*i + 3);
+                divPlayerReady.id = "";
+                (<HTMLInputElement>divPlayerReady.children.item(0)).checked = false;
+                (<HTMLInputElement>divPlayerReady.children.item(0)).disabled = true;
             }
     }
 
@@ -212,28 +249,31 @@ socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRo
         selectNbPlayers.value = nbPlayersMax.toString();
         
     const divPlayersList = <HTMLDivElement>document.getElementById('playersList');
-    let nbPlayersCur = divPlayersList.children.length;
+    let nbPlayersCur = Math.floor(divPlayersList.children.length / 4) - 1;
 
     if (nbPlayersCur < nbPlayersMax)
         for (let i = nbPlayersCur + 1; i <= nbPlayersMax; i++)
         {
-            const divPlayer = <HTMLDivElement>document.createElement('div');
-            divPlayer.id = "";
-
             // name
+            const divPlayerName = <HTMLDivElement>document.createElement('div');
             const labelPlayerName = <HTMLLabelElement>document.createElement('label');
             labelPlayerName.textContent = "...";
-            divPlayer.appendChild(labelPlayerName);
+            divPlayerName.classList.add('center');
+            divPlayerName.appendChild(labelPlayerName);
+            divPlayersList.appendChild(divPlayerName);
 
             // color
+            const divPlayerColor = <HTMLDivElement>document.createElement('div');
             const inputPlayerColor = <HTMLInputElement>document.createElement('input');
             inputPlayerColor.type = "color";
             inputPlayerColor.value = "#0000ff";
             inputPlayerColor.disabled = true;
             inputPlayerColor.addEventListener('change', setPlayerParams);
-            divPlayer.appendChild(inputPlayerColor);
+            divPlayerColor.appendChild(inputPlayerColor);
+            divPlayersList.appendChild(divPlayerColor);
 
             // team
+            const divPlayerTeam = <HTMLDivElement>document.createElement('div');
             const selectPlayerTeam = <HTMLSelectElement>document.createElement('select');
             for (let i = 1; i <= 2; i++)
             {
@@ -245,36 +285,43 @@ socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRo
             selectPlayerTeam.selectedIndex = -1;
             selectPlayerTeam.disabled = true;
             selectPlayerTeam.addEventListener('change', setPlayerParams);
-            divPlayer.appendChild(selectPlayerTeam);
+            divPlayerTeam.appendChild(selectPlayerTeam);
+            divPlayersList.appendChild(divPlayerTeam);
 
             // ready
+            const divPlayerReady = <HTMLDivElement>document.createElement('div');
             const checkboxReady = <HTMLInputElement>document.createElement('input');
             checkboxReady.type = "checkbox";
             checkboxReady.textContent = "Ready";
             checkboxReady.disabled = true;
             checkboxReady.addEventListener('change', setPlayerParams);
-            divPlayer.appendChild(checkboxReady);
-
-            divPlayersList.appendChild(divPlayer);
+            divPlayerReady.appendChild(checkboxReady);
+            divPlayersList.appendChild(divPlayerReady);
         }
     else if (nbPlayersCur > nbPlayersMax)
     {
         // remove and kick last overnumerous connected players
         while (nbPlayersCur > nbPlayersMax)
         {
-            const divPlayer = <HTMLDivElement>divPlayersList.lastChild;
+            const divPlayerName  = <HTMLDivElement>divPlayersList.children.item(4*nbPlayersCur);
+            const divPlayerColor = <HTMLDivElement>divPlayersList.children.item(4*nbPlayersCur + 1);
+            const divPlayerTeam  = <HTMLDivElement>divPlayersList.children.item(4*nbPlayersCur + 2);
+            const divPlayerReady = <HTMLDivElement>divPlayersList.children.item(4*nbPlayersCur + 3);
 
             // kick player if connected in room
-            const playerIdPrefix = 'params_setup_player_';
-            if (divPlayer.id && divPlayer.id.startsWith(playerIdPrefix))
+            const playerIdPrefix = 'setup_player_name_';
+            if (divPlayerName.id && divPlayerName.id.startsWith(playerIdPrefix))
             {
-                const id: string = divPlayer.id.replace(playerIdPrefix, "");
+                const id: string = divPlayerName.id.replace(playerIdPrefix, "");
                 //console.log("kick player", id);
                 socket.emit('kickPlayer', {id: id}, (response: any) => {});
             }
 
-            divPlayersList.removeChild(divPlayer);
-            nbPlayersCur = divPlayersList.children.length;
+            divPlayersList.removeChild(divPlayerReady);
+            divPlayersList.removeChild(divPlayerTeam);
+            divPlayersList.removeChild(divPlayerColor);
+            divPlayersList.removeChild(divPlayerName);
+            nbPlayersCur = Math.floor(divPlayersList.children.length / 4) - 1;
         }
     }
 
@@ -288,16 +335,18 @@ socket.on('updateRoomParams', (params: {room: string, nbPlayersMax: number, nbRo
 
 // send player params
 function setPlayerParams()
-{
+{  
     // get player color
-    const divPlayer = <HTMLDivElement>document.getElementById(`params_setup_player_${selfID}`);
-    const color = (<HTMLInputElement>divPlayer.children.item(1)).value;
+    const divPlayerColor = document.getElementById(`setup_player_color_${selfID}`);
+    const color = (<HTMLInputElement>divPlayerColor?.children.item(0)).value;
 
     // get player team
-    const team = (<HTMLInputElement>divPlayer.children.item(2)).value;
+    const divPlayerTeam = document.getElementById(`setup_player_team_${selfID}`);
+    const team = (<HTMLInputElement>divPlayerTeam?.children.item(0)).value;
 
-    // player ready?
-    const ready = (<HTMLInputElement>divPlayer.children.item(3)).checked;
+    // get player ready
+    const divPlayerReady = document.getElementById(`setup_player_ready_${selfID}`);
+    const ready = (<HTMLInputElement>divPlayerReady?.children.item(0)).checked;
 
     socket.emit('setPlayerParams', {color: color, team: team, ready: ready}, (response: any) => {});
 }
@@ -312,14 +361,17 @@ socket.on('updatePlayersParams', (params:  Array<{id: string, name: string, colo
         if (id == selfID)
             continue; // nop
 
-        let divPlayer = <HTMLDivElement>document.getElementById(`params_setup_player_${id}`);
-        if (divPlayer === null)
-            continue;
+        // update player color
+        let divPlayerColor = document.getElementById(`setup_player_color_${id}`);
+        (<HTMLInputElement>divPlayerColor?.children.item(0)).value = playerParams.color;
 
-        // update other player parameters
-        (<HTMLInputElement>divPlayer.children.item(1)).value = playerParams.color;
-        (<HTMLSelectElement>divPlayer.children.item(2)).value = playerParams.team;
-        (<HTMLInputElement>divPlayer.children.item(3)).checked = playerParams.ready;
+        // get player team
+        let divPlayerTeam = document.getElementById(`setup_player_team_${id}`);
+        (<HTMLSelectElement>divPlayerTeam?.children.item(0)).value = playerParams.team;
+
+        // get player ready
+        let divPlayerReady = document.getElementById(`setup_player_ready_${id}`);
+        (<HTMLInputElement>divPlayerReady?.children.item(0)).checked = playerParams.ready;
     }
     updatePlayButton();
 
@@ -365,7 +417,7 @@ function updatePlayButton()
     const divPlayersList = <HTMLDivElement>document.getElementById('playersList');
     for (const divPlayer of divPlayersList.children)
     {
-        const playerIdPrefix = 'params_setup_player_';
+        const playerIdPrefix = 'setup_player_name_';
         if (divPlayer.id && divPlayer.id.startsWith(playerIdPrefix))
             nbPlayers++;
     }
@@ -375,9 +427,9 @@ function updatePlayButton()
     let hasTeam1: boolean = false;
     let hasTeam2: boolean = false;
     let teamFilled: boolean = true;
-    for (const divPlayer of divPlayersList.children)
+    for (const divPlayerTeam of divPlayersList.querySelectorAll("[id^='setup_player_team_']"))
     {
-        const team = (<HTMLSelectElement>divPlayer.children.item(2)).value;
+        const team = (<HTMLSelectElement>divPlayerTeam.children.item(0)).value;
         if (team == "1")
             hasTeam1 = true;
         else if (team == "2")
@@ -391,8 +443,8 @@ function updatePlayButton()
 
     // get ready states
     let ready: boolean = true;
-    for (const divPlayer of divPlayersList.children)
-        ready &&= (<HTMLInputElement>divPlayer.children.item(3)).checked;
+    for (const divPlayerReady of divPlayersList.querySelectorAll("[id^='setup_player_ready_']"))
+        ready &&= (<HTMLInputElement>divPlayerReady.children.item(0)).checked;
 
     setEnabled("buttonPlay", nbPlayersCorrect && teamsCorrect && ready);
 }
