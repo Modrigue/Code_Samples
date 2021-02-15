@@ -5,19 +5,10 @@ if (DEPLOY_CLIENT)
     socket = io.connect();
 else
     socket = io.connect(`http://localhost:${PORT}`);
-class Player {
-    constructor() {
-        this.score = 0;
-        this.no = 0;
-        this.name = "";
-        this.room = "";
-        this.color = "";
-    }
-}
-// init game
-let clientBalls = new Map();
+// player params
 let selfID;
 let creator = false;
+let reconnecting = false;
 /////////////////////////// INTERACTION WITH SERVER ///////////////////////////
 socket.on('connect', () => {
     selfID = socket.id;
@@ -52,9 +43,10 @@ function onSubmit() {
                     setVisible("pageGame", false);
                     setEnabled("gameNbPlayers", false);
                     setEnabled("gameNbRounds", false);
-                    setEnabled("buttonPlay", response.enablePlay);
+                    setEnabled("buttonPlay", false);
                     document.getElementById('buttonPlay').innerText
                         = response.enablePlay ? "JOIN GAME" : "START GAME";
+                    reconnecting = response.enablePlay;
                 }
             });
             break;
@@ -232,7 +224,7 @@ socket.on('updatePlayersParams', (params) => {
     updatePlayButton();
 });
 function updatePlayButton() {
-    if (!creator) {
+    if (!creator && !reconnecting) {
         setEnabled("buttonPlay", false);
         return;
     }

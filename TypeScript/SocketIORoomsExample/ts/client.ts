@@ -6,20 +6,10 @@ if (DEPLOY_CLIENT)
 else
     socket = io.connect(`http://localhost:${PORT}`);
 
-class Player
-{
-    score: number = 0;
-    no: number = 0;
-    name: string = "";
-
-    room: string = "";
-    color: string = "";
-}
-
-// init game
-let clientBalls: Map<string, Player> = new Map<string, Player>();
+// player params
 let selfID: string;
 let creator: boolean = false;
+let reconnecting: boolean = false;
 
 
 /////////////////////////// INTERACTION WITH SERVER ///////////////////////////
@@ -73,9 +63,11 @@ function onSubmit()
 
                     setEnabled("gameNbPlayers", false);
                     setEnabled("gameNbRounds", false);
-                    setEnabled("buttonPlay", response.enablePlay);
+                    setEnabled("buttonPlay", false);
                     (<HTMLButtonElement>document.getElementById('buttonPlay')).innerText
                         = response.enablePlay ? "JOIN GAME" : "START GAME";
+
+                    reconnecting = response.enablePlay;
                 }
             });
             break;
@@ -320,7 +312,7 @@ socket.on('updatePlayersParams', (params:  Array<{id: string, color: string, tea
 
 function updatePlayButton()
 {
-    if (!creator)
+    if (!creator && !reconnecting)
     {
         setEnabled("buttonPlay", false);
         return;
