@@ -214,6 +214,7 @@ function connected(socket) {
         deleteEmptyRooms();
         updateRoomsList();
         updatePlayersList(room);
+        updatePlayersParams(room);
     });
     socket.on('kickPlayer', (params, response) => {
         let player = getPlayerFromId(params.id);
@@ -274,7 +275,7 @@ function updatePlayersParams(room) {
     const game = games.get(room);
     let playersParams = new Array();
     for (const [id, player] of game.players)
-        playersParams.push({ id: id, color: player.color, team: player.team, ready: player.ready });
+        playersParams.push({ id: id, name: player.name, color: player.color, team: player.team, ready: player.ready });
     io.to(room).emit('updatePlayersParams', playersParams);
 }
 function kickPlayerFromRoom(room, id) {

@@ -132,3 +132,11 @@ function setEnabled(id: string, status: boolean): void
     let elem: any = document.getElementById(id);
     elem.disabled = !status;
 }
+
+function removeAllChildren(parent: any): void
+{
+    while (parent.firstChild)
+    {
+        parent.removeChild(parent.firstChild);
+    }
+}

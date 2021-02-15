@@ -97,4 +97,9 @@ function setEnabled(id, status) {
     let elem = document.getElementById(id);
     elem.disabled = !status;
 }
+function removeAllChildren(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
 //# sourceMappingURL=interface.js.map

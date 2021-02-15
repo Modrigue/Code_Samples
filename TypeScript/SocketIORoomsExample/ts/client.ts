@@ -303,8 +303,9 @@ function setPlayerParams()
 }
 
 // update player params
-socket.on('updatePlayersParams', (params:  Array<{id: string, color: string, team: string, ready: boolean}>) => {
+socket.on('updatePlayersParams', (params:  Array<{id: string, name: string, color: string, team: string, ready: boolean}>) => {
 
+    // setup page
     for (const playerParams of params)
     {
         const id = playerParams.id;
@@ -320,8 +321,31 @@ socket.on('updatePlayersParams', (params:  Array<{id: string, color: string, tea
         (<HTMLSelectElement>divPlayer.children.item(2)).value = playerParams.team;
         (<HTMLInputElement>divPlayer.children.item(3)).checked = playerParams.ready;
     }
-
     updatePlayButton();
+
+    // game page
+
+    let team1Div = <HTMLDivElement>document.getElementById('gameTeam1');
+    let team2Div = <HTMLDivElement>document.getElementById('gameTeam2');
+
+    // remove former players params
+    removeAllChildren(team1Div);
+    removeAllChildren(team2Div);
+
+    // set players params
+    team1Div.textContent = "Team 1:";
+    team2Div.textContent = "Team 2:";
+    for (const playerParams of params)
+    {
+        let playerText: HTMLSpanElement = document.createElement('span');
+        playerText.textContent = " " + playerParams.name;
+        playerText.style.color = playerParams.color;
+
+        if (playerParams.team == "1")
+            team1Div.appendChild(playerText);
+        else if (playerParams.team == "2")
+            team2Div.appendChild(playerText);
+    }
 });
 
 function updatePlayButton()
@@ -350,6 +374,7 @@ function updatePlayButton()
     // get current players teams
     let hasTeam1: boolean = false;
     let hasTeam2: boolean = false;
+    let teamFilled: boolean = true;
     for (const divPlayer of divPlayersList.children)
     {
         const team = (<HTMLSelectElement>divPlayer.children.item(2)).value;
@@ -357,10 +382,12 @@ function updatePlayButton()
             hasTeam1 = true;
         else if (team == "2")
             hasTeam2 = true;
+        else
+            teamFilled = false;
     }
-    let teamsCorrect: boolean = (hasTeam1 && hasTeam2);
+    let teamsCorrect: boolean = (hasTeam1 && hasTeam2 && teamFilled);
     if (nbPlayersMax == 1)
-        teamsCorrect = (hasTeam1 || hasTeam2);
+        teamsCorrect = ((hasTeam1 || hasTeam2) && teamFilled);
 
     // get ready states
     let ready: boolean = true;
@@ -374,6 +401,10 @@ function onPlay()
 {
     socket.emit('play', null, (response: any) => {});
 }
+
+
+/////////////////////////////////// GAME PAGE /////////////////////////////////
+
 
 socket.on('playGame', (params: {room: string, nbPlayersMax: string, nbRounds: string}) => {
 

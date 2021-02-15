@@ -220,6 +220,7 @@ function setPlayerParams() {
 }
 // update player params
 socket.on('updatePlayersParams', (params) => {
+    // setup page
     for (const playerParams of params) {
         const id = playerParams.id;
         if (id == selfID)
@@ -233,6 +234,24 @@ socket.on('updatePlayersParams', (params) => {
         divPlayer.children.item(3).checked = playerParams.ready;
     }
     updatePlayButton();
+    // game page
+    let team1Div = document.getElementById('gameTeam1');
+    let team2Div = document.getElementById('gameTeam2');
+    // remove former players params
+    removeAllChildren(team1Div);
+    removeAllChildren(team2Div);
+    // set players params
+    team1Div.textContent = "Team 1:";
+    team2Div.textContent = "Team 2:";
+    for (const playerParams of params) {
+        let playerText = document.createElement('span');
+        playerText.textContent = " " + playerParams.name;
+        playerText.style.color = playerParams.color;
+        if (playerParams.team == "1")
+            team1Div.appendChild(playerText);
+        else if (playerParams.team == "2")
+            team2Div.appendChild(playerText);
+    }
 });
 function updatePlayButton() {
     if (!creator && !reconnecting) {
@@ -254,16 +273,19 @@ function updatePlayButton() {
     // get current players teams
     let hasTeam1 = false;
     let hasTeam2 = false;
+    let teamFilled = true;
     for (const divPlayer of divPlayersList.children) {
         const team = divPlayer.children.item(2).value;
         if (team == "1")
             hasTeam1 = true;
         else if (team == "2")
             hasTeam2 = true;
+        else
+            teamFilled = false;
     }
-    let teamsCorrect = (hasTeam1 && hasTeam2);
+    let teamsCorrect = (hasTeam1 && hasTeam2 && teamFilled);
     if (nbPlayersMax == 1)
-        teamsCorrect = (hasTeam1 || hasTeam2);
+        teamsCorrect = ((hasTeam1 || hasTeam2) && teamFilled);
     // get ready states
     let ready = true;
     for (const divPlayer of divPlayersList.children)
@@ -273,6 +295,7 @@ function updatePlayButton() {
 function onPlay() {
     socket.emit('play', null, (response) => { });
 }
+/////////////////////////////////// GAME PAGE /////////////////////////////////
 socket.on('playGame', (params) => {
     document.getElementById('gameTitle').innerText
         = `Game ${params.room} - ${params.nbPlayersMax} players - ${params.nbRounds} rounds`;
