@@ -142,7 +142,6 @@ socket.on('updatePlayersList', (params) => {
             // player ready
             const divPlayerReady = divPlayersList.children.item(4 * indexPlayerCur + 3);
             divPlayerReady.id = `setup_player_ready_${playerData.id}`;
-            divPlayerReady.children.item(0).disabled = disableParam;
             indexPlayerCur++;
         }
         // empty remaining player divs        
@@ -256,9 +255,11 @@ function setPlayerParams() {
     // get player team
     const divPlayerTeam = document.getElementById(`setup_player_team_${selfID}`);
     const team = (divPlayerTeam === null || divPlayerTeam === void 0 ? void 0 : divPlayerTeam.children.item(0)).value;
+    const hasTeam = ((divPlayerTeam === null || divPlayerTeam === void 0 ? void 0 : divPlayerTeam.children.item(0)).selectedIndex >= 0);
     // get player ready
     const divPlayerReady = document.getElementById(`setup_player_ready_${selfID}`);
     const ready = (divPlayerReady === null || divPlayerReady === void 0 ? void 0 : divPlayerReady.children.item(0)).checked;
+    (divPlayerReady === null || divPlayerReady === void 0 ? void 0 : divPlayerReady.children.item(0)).disabled = !hasTeam;
     socket.emit('setPlayerParams', { color: color, team: team, ready: ready }, (response) => { });
 }
 // update player params

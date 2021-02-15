@@ -202,7 +202,6 @@ socket.on('updatePlayersList', (params: Array<{id: string, name: string}>) => {
             // player ready
             const divPlayerReady = <HTMLDivElement>divPlayersList.children.item(4*indexPlayerCur + 3);
             divPlayerReady.id = `setup_player_ready_${playerData.id}`;
-            (<HTMLInputElement>divPlayerReady.children.item(0)).disabled = disableParam;
             
             indexPlayerCur++;
         }
@@ -343,10 +342,12 @@ function setPlayerParams()
     // get player team
     const divPlayerTeam = document.getElementById(`setup_player_team_${selfID}`);
     const team = (<HTMLInputElement>divPlayerTeam?.children.item(0)).value;
+    const hasTeam: boolean = ((<HTMLSelectElement>divPlayerTeam?.children.item(0)).selectedIndex >= 0);
 
     // get player ready
     const divPlayerReady = document.getElementById(`setup_player_ready_${selfID}`);
     const ready = (<HTMLInputElement>divPlayerReady?.children.item(0)).checked;
+    (<HTMLInputElement>divPlayerReady?.children.item(0)).disabled = !hasTeam;
 
     socket.emit('setPlayerParams', {color: color, team: team, ready: ready}, (response: any) => {});
 }
