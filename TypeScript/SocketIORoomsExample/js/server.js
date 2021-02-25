@@ -71,7 +71,7 @@ function connected(socket) {
         creator.room = room;
         let newGame = new Game_S();
         newGame.players.set(socket.id, creator);
-        newGame.password = params.password;
+        newGame.password = params.password; // TODO: hash password
         newGame.status = GameStatus.SETUP;
         games.set(room, newGame);
         socket.join(room);
