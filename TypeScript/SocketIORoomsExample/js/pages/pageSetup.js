@@ -177,13 +177,17 @@ socket.on('updatePlayersParams', (params) => {
     // setup page
     for (const playerParams of params) {
         const id = playerParams.id;
+        // update player name color
+        let divPlayerName = document.getElementById(`setup_player_name_${id}`);
+        (divPlayerName === null || divPlayerName === void 0 ? void 0 : divPlayerName.children.item(0)).style.color = playerParams.color;
+        let divPlayerTeam = document.getElementById(`setup_player_team_${id}`);
+        (divPlayerTeam === null || divPlayerTeam === void 0 ? void 0 : divPlayerTeam.children.item(0)).style.color = playerParams.color;
         if (id == selfID)
             continue; // nop
         // update player color
         let divPlayerColor = document.getElementById(`setup_player_color_${id}`);
         (divPlayerColor === null || divPlayerColor === void 0 ? void 0 : divPlayerColor.children.item(0)).value = playerParams.color;
         // get player team
-        let divPlayerTeam = document.getElementById(`setup_player_team_${id}`);
         (divPlayerTeam === null || divPlayerTeam === void 0 ? void 0 : divPlayerTeam.children.item(0)).value = playerParams.team;
         // get player ready
         let divPlayerReady = document.getElementById(`setup_player_ready_${id}`);

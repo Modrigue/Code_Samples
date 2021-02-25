@@ -226,6 +226,14 @@ socket.on('updatePlayersParams', (params:  Array<{id: string, name: string, colo
     for (const playerParams of params)
     {
         const id = playerParams.id;
+
+        // update player name color
+        let divPlayerName = document.getElementById(`setup_player_name_${id}`);
+        (<HTMLInputElement>divPlayerName?.children.item(0)).style.color = playerParams.color;
+
+        let divPlayerTeam = document.getElementById(`setup_player_team_${id}`);
+        (<HTMLInputElement>divPlayerTeam?.children.item(0)).style.color = playerParams.color;
+
         if (id == selfID)
             continue; // nop
 
@@ -234,7 +242,6 @@ socket.on('updatePlayersParams', (params:  Array<{id: string, name: string, colo
         (<HTMLInputElement>divPlayerColor?.children.item(0)).value = playerParams.color;
 
         // get player team
-        let divPlayerTeam = document.getElementById(`setup_player_team_${id}`);
         (<HTMLSelectElement>divPlayerTeam?.children.item(0)).value = playerParams.team;
 
         // get player ready
