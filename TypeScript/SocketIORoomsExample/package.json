@@ -11,8 +11,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "^2.4.0"
+    "express": "^4.21.1",
+    "socket.io": "^4.8.0"
   },
   "devDependencies": {
     "@types/node": "^14.14.22",
