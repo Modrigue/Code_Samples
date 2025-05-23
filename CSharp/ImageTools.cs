@@ -1,10 +1,13 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Media.Imaging;
 
 namespace CodeSamples.CSharp
 {
+    /// <summary>
+    /// Provides utility methods for image manipulation and conversion.
+    /// </summary>
     public class ImageTools
     {
         /// <summary>
@@ -29,6 +32,11 @@ namespace CodeSamples.CSharp
             }
         }
 
+        /// <summary>
+        /// Converts a BitmapSource to a Bitmap.
+        /// </summary>
+        /// <param name="bitmapsource">The source BitmapSource to convert.</param>
+        /// <returns>A new Bitmap containing the converted image.</returns>
         public static Bitmap BitmapFromSource(BitmapSource bitmapsource)
         {
             Bitmap bitmap;
@@ -42,6 +50,12 @@ namespace CodeSamples.CSharp
             return bitmap;
         }
 
+        /// <summary>
+        /// Converts a BitmapSource to a Bitmap with the specified pixel format.
+        /// </summary>
+        /// <param name="source">The source BitmapSource to convert.</param>
+        /// <param name="format">The target pixel format (default is Format1bppIndexed).</param>
+        /// <returns>A new Bitmap with the specified pixel format.</returns>
         public static Bitmap BitmapFromSource2(BitmapSource source, PixelFormat format = PixelFormat.Format1bppIndexed)
         {
             Bitmap bmp = new Bitmap
@@ -71,7 +85,12 @@ namespace CodeSamples.CSharp
             return bmp;
         }
 
-		// add white borders around image
+        /// <summary>
+        /// Adds white borders around the specified image.
+        /// </summary>
+        /// <param name="image">The source image to add borders to.</param>
+        /// <param name="borderSize">The size of the border to add (in pixels).</param>
+        /// <returns>A new Bitmap with added borders, or null if the input is null.</returns>
         public static Bitmap AddBordersToImage(Bitmap image, int borderSize)
         {
             if (image == null)
@@ -127,6 +146,13 @@ namespace CodeSamples.CSharp
             return bmp;
         }
 
+        /// <summary>
+        /// Copies a region from one bitmap to another with high quality settings.
+        /// </summary>
+        /// <param name="srcBitmap">The source bitmap.</param>
+        /// <param name="srcRegion">The region of the source bitmap to copy.</param>
+        /// <param name="dstBitmap">The destination bitmap (will be modified).</param>
+        /// <param name="dstRegion">The region in the destination bitmap to copy to.</param>
         private static void copyRegionIntoImage(Bitmap srcBitmap, Rectangle srcRegion, ref Bitmap dstBitmap, Rectangle dstRegion)
         {
             using (Graphics g = Graphics.FromImage(dstBitmap))
@@ -139,6 +165,11 @@ namespace CodeSamples.CSharp
             }
         }
 
+        /// <summary>
+        /// Gets the image encoder for the specified image format.
+        /// </summary>
+        /// <param name="format">The image format to get the encoder for.</param>
+        /// <returns>An ImageCodecInfo for the specified format, or null if not found.</returns>
         public static ImageCodecInfo GetImageEncoder(ImageFormat format)
         {
             ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();

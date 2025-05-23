@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -19,9 +19,21 @@ namespace CodeSamples.CSharp
     //    { "other_file", new FormFile() { Name = "image2.jpg", ContentType = "image/jpeg", Stream = imageDataStream } },
     //});
 
+    /// <summary>
+    /// Provides helper methods for making HTTP requests to web services, including support for multipart form data.
+    /// </summary>
     public static class WebServiceRequestHelper
     {
 
+        /// <summary>
+        /// Sends a multipart form data request to the specified URL with the given parameters.
+        /// </summary>
+        /// <param name="url">The base URL of the web service.</param>
+        /// <param name="operation">The operation or endpoint to call.</param>
+        /// <param name="method">The HTTP method to use (e.g., "POST", "PUT").</param>
+        /// <param name="token">The authentication token to include in the request headers.</param>
+        /// <param name="parameters">A dictionary of parameters to include in the request (can include FormFile objects for file uploads).</param>
+        /// <returns>The response from the server as a string.</returns>
         public static string PostMultipart(string url, string operation, string method, string token, Dictionary<string, object> parameters = null)
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
@@ -132,6 +144,12 @@ namespace CodeSamples.CSharp
             }
         }
 
+        /// <summary>
+        /// Converts an Image to a MemoryStream with the specified format.
+        /// </summary>
+        /// <param name="image">The image to convert.</param>
+        /// <param name="format">The image format to use when saving.</param>
+        /// <returns>A MemoryStream containing the image data.</returns>
         public static Stream ImageToStream(Image image, ImageFormat format)
         {
             var stream = new MemoryStream();
@@ -140,6 +158,11 @@ namespace CodeSamples.CSharp
             return stream;
         }
 
+        /// <summary>
+        /// Reads an image file and returns its contents as a byte array.
+        /// </summary>
+        /// <param name="imagePath">The path to the image file.</param>
+        /// <returns>A byte array containing the image data.</returns>
         public static byte[] ImageFileToByteArray(string imagePath)
         {
             FileStream fs = File.OpenRead(imagePath);
@@ -151,7 +174,10 @@ namespace CodeSamples.CSharp
     }
 	
 	
-	public class FormFile
+	/// <summary>
+    /// Represents a file to be uploaded in a multipart form request.
+    /// </summary>
+    public class FormFile
     {
         public string Name { get; set; }
 

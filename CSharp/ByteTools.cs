@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -188,6 +188,12 @@ namespace CodeSamples.CSharp
             }
         }
 
+        /// <summary>
+        /// Copies a range of bytes from the source array starting at the specified offset to the end.
+        /// </summary>
+        /// <param name="src">The source byte array.</param>
+        /// <param name="offset">The zero-based offset at which to start copying.</param>
+        /// <returns>A new byte array containing the copied range.</returns>
         public static byte[] CopyRange(byte[] src, int offset)
         {
             int length = src.Length - offset;
@@ -201,6 +207,13 @@ namespace CodeSamples.CSharp
             return dest;
         }
 
+        /// <summary>
+        /// Copies a specified range of bytes from the source array.
+        /// </summary>
+        /// <param name="src">The source byte array.</param>
+        /// <param name="start">The zero-based starting position in the source array.</param>
+        /// <param name="end">The position in the source array at which to stop copying (exclusive).</param>
+        /// <returns>A new byte array containing the specified range.</returns>
         public static byte[] CopyRange(byte[] src, int start, int end)
         {
             int length = end - start;
@@ -214,6 +227,11 @@ namespace CodeSamples.CSharp
             return dest;
         }
 
+        /// <summary>
+        /// Converts a byte to its unsigned integer representation.
+        /// </summary>
+        /// <param name="b">The byte to convert.</param>
+        /// <returns>An integer representing the unsigned value of the byte.</returns>
         public static int UnsignedToByte(byte b)
         {
             return ((int)b) & 0xFF;
@@ -243,6 +261,11 @@ namespace CodeSamples.CSharp
             return true;
         }
 
+        /// <summary>
+        /// Converts a byte array to a string using the default encoding.
+        /// </summary>
+        /// <param name="array">The byte array to convert.</param>
+        /// <returns>A string representation of the byte array, or null if the input is null.</returns>
         public static string ConvertByteArrayToString(byte[] array)
         {
             if (array == null)
@@ -261,6 +284,11 @@ namespace CodeSamples.CSharp
             return res;
         }
 
+        /// <summary>
+        /// Converts a string to a byte array using the default encoding.
+        /// </summary>
+        /// <param name="text">The string to convert.</param>
+        /// <returns>A byte array representing the string, or null if the input is null or empty.</returns>
         public static byte[] ConvertStringToByteArray(string text)
         {
             if (String.IsNullOrEmpty(text))
@@ -280,6 +308,12 @@ namespace CodeSamples.CSharp
             return array;
         }
 
+        /// <summary>
+        /// Trims null bytes from the end of a byte array.
+        /// </summary>
+        /// <param name="array">The byte array to trim.</param>
+        /// <param name="addLastZero">If true, ensures the result ends with a zero byte.</param>
+        /// <returns>A new byte array with trailing null bytes removed.</returns>
         public static byte[] TrimEndByteArray(byte[] array, bool addLastZero = false)
         {
             int lastZeroIndex = Array.FindLastIndex(array, b => b != 0);
@@ -295,6 +329,12 @@ namespace CodeSamples.CSharp
             return array;
         }
 
+        /// <summary>
+        /// Trims a byte array to the specified length.
+        /// </summary>
+        /// <param name="array">The byte array to trim.</param>
+        /// <param name="index">The index at which to trim the array.</param>
+        /// <returns>A new byte array with the specified length.</returns>
         public static byte[] TrimByteArrayToIndex(byte[] array, int index)
         {
             Array.Resize(ref array, index);

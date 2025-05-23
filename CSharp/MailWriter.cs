@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,36 +13,70 @@ using System.Threading.Tasks;
 
 namespace CodeSamples.CSharp
 {
+    /// <summary>
+    /// Provides functionality to create and send emails with attachments using MAPI.
+    /// </summary>
     public class MailWriter
     {
         #region Public methods
 
+        /// <summary>
+        /// Adds a recipient to the email's To field.
+        /// </summary>
+        /// <param name="email">The email address of the recipient to add.</param>
+        /// <returns>True if the recipient was added successfully; otherwise, false.</returns>
         public bool AddRecipientTo(string email)
         {
             return AddRecipient(email, HowTo.MAPI_TO);
         }
 
+        /// <summary>
+        /// Adds a recipient to the email's CC field.
+        /// </summary>
+        /// <param name="email">The email address of the CC recipient to add.</param>
+        /// <returns>True if the recipient was added successfully; otherwise, false.</returns>
         public bool AddRecipientCC(string email)
         {
             return AddRecipient(email, HowTo.MAPI_CC);
         }
 
+        /// <summary>
+        /// Adds a recipient to the email's BCC field.
+        /// </summary>
+        /// <param name="email">The email address of the BCC recipient to add.</param>
+        /// <returns>True if the recipient was added successfully; otherwise, false.</returns>
         public bool AddRecipientBCC(string email)
         {
             return AddRecipient(email, HowTo.MAPI_BCC);
         }
 
+        /// <summary>
+        /// Adds a file attachment to the email.
+        /// </summary>
+        /// <param name="strAttachmentFileName">The full path to the file to be attached.</param>
         public void AddAttachment(string strAttachmentFileName)
         {
             if (!String.IsNullOrEmpty(strAttachmentFileName))
                 m_attachments.Add(strAttachmentFileName);
         }
 
+        /// <summary>
+        /// Sends the email with a popup dialog for the user to review before sending.
+        /// </summary>
+        /// <param name="strSubject">The subject of the email.</param>
+        /// <param name="strBody">The body text of the email.</param>
+        /// <returns>An integer representing the result of the MAPI send operation.</returns>
         public int SendMailPopup(string strSubject, string strBody)
         {
             return SendMail(strSubject, strBody, MAPI_LOGON_UI | MAPI_DIALOG);
         }
 
+        /// <summary>
+        /// Sends the email directly without showing a popup dialog.
+        /// </summary>
+        /// <param name="strSubject">The subject of the email.</param>
+        /// <param name="strBody">The body text of the email.</param>
+        /// <returns>An integer representing the result of the MAPI send operation.</returns>
         public int SendMailDirect(string strSubject, string strBody)
         {
             return SendMail(strSubject, strBody, MAPI_LOGON_UI);
@@ -55,7 +89,14 @@ namespace CodeSamples.CSharp
         [DllImport("MAPI32.DLL")]
         static extern int MAPISendMail(IntPtr sess, IntPtr hwnd, MapiMessage message, int flg, int rsv);
 
-        int SendMail(string strSubject, string strBody, int how)
+        /// <summary>
+        /// Internal method to send the email using MAPI.
+        /// </summary>
+        /// <param name="strSubject">The subject of the email.</param>
+        /// <param name="strBody">The body text of the email.</param>
+        /// <param name="how">Flags controlling how the email is sent (e.g., MAPI_LOGON_UI).</param>
+        /// <returns>An integer representing the result of the MAPI send operation.</returns>
+        private int SendMail(string strSubject, string strBody, int how)
         {
             MapiMessage msg = new MapiMessage();
             msg.subject = strSubject;
@@ -72,7 +113,13 @@ namespace CodeSamples.CSharp
             return m_lastError;
         }
 
-        bool AddRecipient(string email, HowTo howTo)
+        /// <summary>
+        /// Adds a recipient with the specified type (To, CC, BCC).
+        /// </summary>
+        /// <param name="email">The email address of the recipient.</param>
+        /// <param name="howTo">The type of recipient (To, CC, or BCC).</param>
+        /// <returns>True if the recipient was added successfully; otherwise, false.</returns>
+        private bool AddRecipient(string email, HowTo howTo)
         {
             MapiRecipDesc recipient = new MapiRecipDesc();
 
@@ -83,7 +130,12 @@ namespace CodeSamples.CSharp
             return true;
         }
 
-        IntPtr GetRecipients(out int recipCount)
+        /// <summary>
+        /// Gets an array of MAPI recipient structures for all recipients.
+        /// </summary>
+        /// <param name="recipCount">The number of recipients added.</param>
+        /// <returns>An IntPtr to the array of MAPI recipient structures.</returns>
+        private IntPtr GetRecipients(out int recipCount)
         {
             recipCount = 0;
             if (m_recipients.Count == 0)
@@ -117,7 +169,12 @@ namespace CodeSamples.CSharp
             return intPtr;
         }
 
-        IntPtr GetAttachments(out int fileCount)
+        /// <summary>
+        /// Gets an array of MAPI file attachment structures for all attachments.
+        /// </summary>
+        /// <param name="fileCount">The number of files added as attachments.</param>
+        /// <returns>An IntPtr to the array of MAPI file attachment structures.</returns>
+        private IntPtr GetAttachments(out int fileCount)
         {
             fileCount = 0;
             if (m_attachments == null)
@@ -161,7 +218,11 @@ namespace CodeSamples.CSharp
             return intPtr;
         }
 
-        void Cleanup(ref MapiMessage msg)
+        /// <summary>
+        /// Cleans up allocated resources for the MAPI message.
+        /// </summary>
+        /// <param name="msg">The MAPI message structure to clean up.</param>
+        private void Cleanup(ref MapiMessage msg)
         {
             int size = Marshal.SizeOf(typeof(MapiRecipDesc));
 
